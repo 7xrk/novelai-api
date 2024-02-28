@@ -1,0 +1,15 @@
+{
+  "name": "@77rk/novelai",
+  "version": "1.0.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "build:npm": "deno run -A --unstable --node-modules-dir build_npm.ts"
+  },
+  "imports": {
+    "outdent": "https://deno.land/x/outdent@v0.8.0/mod.ts",
+    "canvas": "https://deno.land/x/canvas@v1.4.1/mod.ts",
+    "blake2b": "https://deno.land/x/blake2b@v0.1.0/mod.ts",
+    "argontwo": "https://deno.land/x/argontwo@0.2.0/mod.ts",
+    "another_cookiejar": "https://deno.land/x/another_cookiejar@v5.0.3/mod.ts"
+  }
+}
