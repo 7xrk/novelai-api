@@ -1,10 +1,12 @@
+import { unzip } from "npm:unzipit@^1.4.3";
 import {
   NovelAIAugmentImageRequestTypes,
   apiAiAugmentImage,
   nearest64,
 } from "../endpoints/ai.ts";
-import { NovelAISession } from "../libs/session.ts";
-import { Size, adjustResolution, convertToPng } from "./utils.ts";
+import type { NovelAISession } from "../libs/session.ts";
+import { safeJsonParse } from "../utils.ts";
+import { type Size, adjustResolution, convertToPng } from "./utils.ts";
 export const NovelAIImageAugmentEmotionType = {
   neutral: "neutral",
   happy: "happy",
@@ -34,7 +36,7 @@ export const NovelAIImageAugmentEmotionType = {
 
 export type NovelAIImageAugmentEmotionType =
   (typeof NovelAIImageAugmentEmotionType)[keyof typeof NovelAIImageAugmentEmotionType];
-export { type NovelAIAugmentImageRequestTypes };
+export type { NovelAIAugmentImageRequestTypes };
 
 type EmotionAugmentParam = {
   reqType: typeof NovelAIAugmentImageRequestTypes.emotion;
@@ -76,7 +78,7 @@ export async function augmentImage(
     | LineArtAugmentParam
     | ColorizeAugmentParam
   )
-) {
+): Promise<{ images: Blob[] }> {
   let { width, height } = size;
 
   width = nearest64(width);
@@ -105,7 +107,7 @@ export async function augmentImage(
       ? `${emotionPrefix}${params.prompt}`
       : "";
 
-  return apiAiAugmentImage(session, {
+  const res = await apiAiAugmentImage(session, {
     defry,
     width,
     height,
@@ -113,4 +115,29 @@ export async function augmentImage(
     prompt,
     reqType: params.reqType,
   });
+
+  if (!res.ok) {
+    const body = await res.text();
+    const json = safeJsonParse(body);
+
+    if (json.ok && json.result?.message) {
+      throw new Error(`Failed to augment image: ${json.result.message}`);
+    } else {
+      throw new Error("Failed to augment image", {
+        cause: new Error(body),
+      });
+    }
+  }
+
+  const entries = Object.entries(
+    (await unzip(await res.arrayBuffer())).entries
+  );
+
+  const images = await Promise.all(
+    entries.map(async ([, entry]) => {
+      return new Blob([await entry.arrayBuffer()], { type: "image/png" });
+    })
+  );
+
+  return { images };
 }

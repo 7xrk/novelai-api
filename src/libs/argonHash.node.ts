@@ -1,5 +1,5 @@
-import blake2b from "npm:blake2b";
-import { hash as argon2, argon2id } from "npm:argon2";
+import blake2b from "blake2b";
+import { hash as argon2, argon2id } from "argon2";
 
 export async function argonHash(
   email: string,
@@ -25,8 +25,6 @@ export async function argonHash(
     version: 0x13,
     raw: true,
   });
-
-  console.log(raw.toString("base64"));
 
   return raw.toString("base64");
 }

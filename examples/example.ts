@@ -5,7 +5,7 @@ import {
   NovelAISession,
   generateImage,
   NovelAIImageSizePreset,
-} from "./mod.ts";
+} from "../mod.ts";
 
 const env = await load();
 

@@ -1,15 +1,38 @@
 {
-  "name": "@77rk/novelai",
+  "name": "@7xrk/novelai-api",
   "version": "1.0.0",
+  "license": "Unlicense",
   "exports": "./mod.ts",
   "tasks": {
-    "build:npm": "deno run -A --unstable --node-modules-dir build_npm.ts"
+    "build:npm": "deno run -A build_npm.ts"
+  },
+  "lint": {
+    "exclude": ["node_modules", "node", ".pnp.*"],
+    "rules": {
+      "exclude": ["no-slow-types"]
+    }
   },
   "imports": {
-    "outdent": "https://deno.land/x/outdent@v0.8.0/mod.ts",
+    "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
+    "@denosaurs/argontwo": "jsr:@denosaurs/argontwo@^0.2.0",
+    "@napi-rs/canvas": "npm:@napi-rs/canvas@^0.1.64",
+    "@rabbit-company/blake2b": "jsr:@rabbit-company/blake2b@^2.1.1",
     "canvas": "https://deno.land/x/canvas@v1.4.1/mod.ts",
-    "blake2b": "https://deno.land/x/blake2b@v0.1.0/mod.ts",
-    "argontwo": "https://deno.land/x/argontwo@0.2.0/mod.ts",
-    "another_cookiejar": "https://deno.land/x/another_cookiejar@v5.0.3/mod.ts"
+    "object-fit-math": "npm:object-fit-math@^1.0.0",
+    "outdent": "https://deno.land/x/outdent@v0.8.0/mod.ts",
+    "unzipit": "npm:unzipit@^1.4.3"
+  },
+  "publish": {
+    "exclude": [
+      ".vscode/**/*",
+      "examples/",
+      "mod_node.ts",
+      "vite.config.mts",
+      "build_npm.ts",
+      ".npmignore",
+      "*.md",
+      "*.lock",
+      "*.json"
+    ]
   }
 }

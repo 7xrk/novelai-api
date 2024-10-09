@@ -1,3 +1,6 @@
+import { argonHash } from "./src/libs/argonHash.node.ts";
+import { createNovelAISessionClass } from "./src/libs/session.ts";
+
 export {
   NovelAIDiffusionModels,
   NovelAIImageAugmentEmotionType,
@@ -12,12 +15,5 @@ export {
 
 export * as novelaiApi from "./src/api.ts";
 
-import { argonHash } from "./src/libs/argonHash.deno.ts";
-import {
-  createNovelAISessionClass,
-  type NovelAISessionClass,
-} from "./src/libs/session.ts";
-
-export const NovelAISession: NovelAISessionClass =
-  createNovelAISessionClass(argonHash);
+export const NovelAISession = createNovelAISessionClass(argonHash);
 export type NovelAISession = InstanceType<typeof NovelAISession>;

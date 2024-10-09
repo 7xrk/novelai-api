@@ -1,0 +1,15 @@
+/examples/*
+/src/*
+/tmp/*
+
+.env
+.DS_Store
+/deno.*
+/*.ts
+/*.{ts,mts}
+
+.vscode/*
+.yarn/*
+.pnp.*
+
+

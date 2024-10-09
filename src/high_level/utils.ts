@@ -1,4 +1,4 @@
-import { loadImage, createCanvas } from "npm:@napi-rs/canvas";
+import { loadImage, createCanvas } from "@napi-rs/canvas";
 
 export type Size = Readonly<{
   width: number;

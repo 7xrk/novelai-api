@@ -1,1 +1,6 @@
-export { apiAiGenerateImage, apiAiUpscale } from "./endpoints/ai.ts";
+export {
+  apiAiGenerateImage,
+  apiAiUpscale,
+  apiAiAugmentImage,
+  apiAiGenerateImageSuggestTags,
+} from "./endpoints/ai.ts";

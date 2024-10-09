@@ -1,4 +1,4 @@
-import { build, emptyDir } from "https://deno.land/x/dnt@0.40.0/mod.ts";
+import { build, emptyDir } from "@deno/dnt";
 
 await emptyDir("./npm");
 
@@ -8,20 +8,21 @@ await build({
   esModule: true,
   scriptModule: false,
   typeCheck: false,
-  filterDiagnostic: (diagnostic) => {
-    if (diagnostic.code === 4060) return false;
-    return true;
-  },
+  declaration: false,
+  test: false,
+  // filterDiagnostic: (diagnostic) => {
+  //   if (diagnostic.code === 4060) return false;
+  //   return true;
+  // },
   shims: {
     deno: true,
     blob: true,
   },
-  compilerOptions: {
-    lib: ["DOM"],
-  },
-  test: false,
+  // compilerOptions: {
+  //   lib: ["DOM"],
+  // },
   mappings: {
-    "./src/libs/argonHash_deno.ts": "./src/libs/argonHash_node.ts",
+    "./argonHash.deno.ts": "./argonHash.node.ts",
   },
   importMap: "deno.json",
   package: {
@@ -40,10 +41,11 @@ await build({
     dependencies: {
       argon2: "^0.40.1",
       blake2b: "^2.1.4",
+      "@napi-rs/canvas": "^0.1.56",
     },
   },
   postBuild() {
-    Deno.copyFileSync("LICENSE", "npm/LICENSE");
+    // Deno.copyFileSync("LICENSE", "npm/LICENSE");
     Deno.copyFileSync("README.md", "npm/README.md");
   },
 });
