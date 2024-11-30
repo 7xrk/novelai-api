@@ -12,7 +12,7 @@ export function createNovelAISessionClass(
 }
 
 export interface NovelAISessionClass {
-  new ({ accessToken }: { accessToken?: string }): INovelAISession;
+  new (params?: { accessToken?: string }): INovelAISession;
 }
 
 export interface INovelAISession {

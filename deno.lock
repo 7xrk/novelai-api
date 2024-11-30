@@ -26,6 +26,7 @@
     "jsr:@ts-morph/bootstrap@0.24": "0.24.0",
     "jsr:@ts-morph/common@0.24": "0.24.0",
     "npm:@napi-rs/canvas@~0.1.64": "0.1.64",
+    "npm:@types/node@*": "22.5.4",
     "npm:object-fit-math@1": "1.0.0",
     "npm:unzipit@*": "1.4.3",
     "npm:unzipit@^1.4.3": "1.4.3"
@@ -189,8 +190,17 @@
         "@napi-rs/canvas-win32-x64-msvc"
       ]
     },
+    "@types/node@22.5.4": {
+      "integrity": "sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
     "object-fit-math@1.0.0": {
       "integrity": "sha512-SqsfEKO6OoHR1K3r5E7JpJoloN6Wd5zPZr0QAo0DAI/zjpadPNcajoUhNvrGUcDHDaF8LEQKCgiiz0+p7lVGeg=="
+    },
+    "undici-types@6.19.8": {
+      "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
     },
     "unzipit@1.4.3": {
       "integrity": "sha512-gsq2PdJIWWGhx5kcdWStvNWit9FVdTewm4SEG7gFskWs+XCVaULt9+BwuoBtJiRE8eo3L1IPAOrbByNLtLtIlg==",
@@ -210,6 +220,9 @@
     "https://deno.land/std@0.106.0/encoding/base64.ts": "eecae390f1f1d1cae6f6c6d732ede5276bf4b9cd29b1d281678c054dc5cc009e",
     "https://deno.land/std@0.204.0/encoding/_util.ts": "f368920189c4fe6592ab2e93bd7ded8f3065b84f95cd3e036a4a10a75649dcba",
     "https://deno.land/std@0.204.0/encoding/base64.ts": "cc03110d6518170aeaa68ec97f89c6d6e2276294b30807e7332591d7ce2e4b72",
+    "https://deno.land/std@0.217.0/dotenv/mod.ts": "0180eaeedaaf88647318811cdaa418cc64dc51fb08354f91f5f480d0a1309f7d",
+    "https://deno.land/std@0.217.0/dotenv/parse.ts": "a49ed243bd62ec26f38614042cda4e5e3a47b18337c93b0f9f8556a5c918884b",
+    "https://deno.land/std@0.217.0/dotenv/stringify.ts": "0047ad7068289735d08964046aea267a750c141b494ca0e38831b89be6c020c2",
     "https://deno.land/x/argontwo@0.2.0/mod.ts": "076395861fc86d5b475ed49ecf10a35df47db55a506469da054a92969d7cdf66",
     "https://deno.land/x/argontwo@0.2.0/wasm/mod.ts": "588486da70ccd43760b71fb3d236ff37d1790d3419cbb764c35fc05a550a2881",
     "https://deno.land/x/argontwo@0.2.0/wasm/wasm.js": "c5fdbe828b5984d9a434247ca2cf6cd44e8f7560490813cdd92be785ec57d3fa",
