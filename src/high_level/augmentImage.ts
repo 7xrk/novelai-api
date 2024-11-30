@@ -4,7 +4,7 @@ import {
   apiAiAugmentImage,
   nearest64,
 } from "../endpoints/ai.ts";
-import type { NovelAISession } from "../libs/session.ts";
+import type { INovelAISession } from "../libs/session.ts";
 import { safeJsonParse } from "../utils.ts";
 import { type Size, adjustResolution, convertToPng } from "./utils.ts";
 export const NovelAIImageAugmentEmotionType = {
@@ -62,7 +62,7 @@ type ColorizeAugmentParam = {
 };
 
 export async function augmentImage(
-  session: NovelAISession,
+  session: INovelAISession,
   {
     size,
     image,

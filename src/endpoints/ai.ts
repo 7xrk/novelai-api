@@ -1,4 +1,4 @@
-import type { NovelAISession } from "../libs/session.ts";
+import type { INovelAISession } from "../libs/session.ts";
 import { encodeBase64, rescue } from "../utils.ts";
 
 export const NovelAIDiffusionModels = {
@@ -31,7 +31,7 @@ export function nearest64(n: number) {
 }
 
 export async function apiAiGenerateImageSuggestTags(
-  session: NovelAISession,
+  session: INovelAISession,
   params: {
     model: NovelAIDiffusionModels;
     prompt: string;
@@ -64,7 +64,7 @@ export async function apiAiGenerateImageSuggestTags(
 }
 
 export async function apiAiGenerateImage(
-  session: NovelAISession,
+  session: INovelAISession,
   body: object
 ): Promise<Response> {
   return await session.req("https://image.novelai.net/ai/generate-image", {
@@ -77,7 +77,7 @@ export async function apiAiGenerateImage(
 }
 
 export async function apiAiAugmentImage(
-  session: NovelAISession,
+  session: INovelAISession,
   {
     defry,
     width,
@@ -113,7 +113,7 @@ export async function apiAiAugmentImage(
 }
 
 export async function apiAiUpscale(
-  session: NovelAISession,
+  session: INovelAISession,
   {
     image,
     width,

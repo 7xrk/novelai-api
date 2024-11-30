@@ -1,5 +1,5 @@
-import type { NovelAISession } from "../libs/session.ts";
+import type { INovelAISession } from "../libs/session.ts";
 
-export async function subscription(session: NovelAISession) {
+export async function subscription(session: INovelAISession) {
   return (await session.req("/user/subscription")).json();
 }

@@ -6,7 +6,7 @@ import {
   apiAiGenerateImage,
   nearest64,
 } from "../endpoints/ai.ts";
-import type { NovelAISession } from "../libs/session.ts";
+import type { INovelAISession } from "../libs/session.ts";
 import { resizeImage, nagativePromptPreset, randomInt } from "../high_level.ts";
 import { type Size, convertToPng } from "./utils.ts";
 import { adjustResolution } from "./utils.ts";
@@ -83,7 +83,7 @@ export type GenerateImageArgs = {
 };
 
 export async function generateImage(
-  session: NovelAISession,
+  session: INovelAISession,
   {
     prompt,
     negativePrompt,

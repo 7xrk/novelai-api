@@ -1,4 +1,4 @@
-import type { NovelAISession } from "../libs/session.ts";
+import type { INovelAISession } from "../libs/session.ts";
 import {
   generateImage,
   type GenerateImageResponse,
@@ -6,7 +6,7 @@ import {
 } from "./generateImage.ts";
 
 export function enhanceImage(
-  session: NovelAISession,
+  session: INovelAISession,
   img: Exclude<GenerateImageArgs["enhanceImg"], void>,
   params: Omit<GenerateImageArgs, "img2img" | "enhanceImg">
 ): Promise<GenerateImageResponse> {
