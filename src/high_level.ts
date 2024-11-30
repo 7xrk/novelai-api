@@ -17,6 +17,7 @@ export {
   generateImage,
   NovelAIImageNegativePromptPreset,
 } from "./high_level/generateImage.ts";
+export { enhanceImage } from "./high_level/enhanceImage.ts";
 
 export const nagativePromptPreset: {
   Heavy: string;

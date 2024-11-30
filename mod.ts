@@ -8,6 +8,7 @@ export {
   upscaleImage,
   augmentImage,
   generateImage,
+  enhanceImage,
 } from "./src/high_level.ts";
 
 export * as novelaiApi from "./src/api.ts";

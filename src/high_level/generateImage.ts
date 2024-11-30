@@ -22,7 +22,7 @@ Object.freeze(NovelAIImageNegativePromptPreset);
 export type NovelAIImageNegativePromptPreset =
   (typeof NovelAIImageNegativePromptPreset)[keyof typeof NovelAIImageNegativePromptPreset];
 
-type GenerateImageResponse = {
+export type GenerateImageResponse = {
   params: Record<string, string | object>;
   files: Blob[];
 };
