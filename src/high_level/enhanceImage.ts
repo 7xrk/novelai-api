@@ -4,14 +4,25 @@ import {
   type GenerateImageResponse,
   type GenerateImageArgs,
 } from "./generateImage.ts";
+import { loadImage } from "./utils.ts";
 
-export function enhanceImage(
+export async function enhanceImage(
   session: INovelAISession,
-  img: Exclude<GenerateImageArgs["enhanceImg"], void>,
-  params: Omit<GenerateImageArgs, "img2img" | "enhanceImg">
+  input: Exclude<GenerateImageArgs["enhanceImg"], void>,
+  { size, ...params }: Omit<GenerateImageArgs, "img2img" | "enhanceImg">
 ): Promise<GenerateImageResponse> {
+  if (!size) {
+    const img = await loadImage(input.image);
+
+    size = {
+      width: img.width,
+      height: img.height,
+    };
+  }
+
   return generateImage(session, {
     ...params,
-    enhanceImg: img,
+    size,
+    enhanceImg: input,
   });
 }

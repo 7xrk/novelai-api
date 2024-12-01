@@ -124,7 +124,7 @@ export async function generateImage(
     height = Math.round(newSize.height);
   }
 
-  if (enhanceImg?.scale) {
+  if (enhanceImg?.scale != null) {
     width = Math.round(width * enhanceImg.scale);
     height = Math.round(height * enhanceImg.scale);
   }
