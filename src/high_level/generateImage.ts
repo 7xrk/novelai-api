@@ -27,6 +27,8 @@ export type GenerateImageResponse = {
   files: Blob[];
 };
 
+const SKIP_CFG_ABOVE_SIGMA_VALUE = 19;
+
 type Img2ImgImage = {
   /** any image type blob */
   image: Blob | Uint8Array;
@@ -53,6 +55,10 @@ export type GenerateImageArgs = {
   qualityTags?: boolean;
   sampler?: NovelAIImageSamplers;
   seed?: number;
+  guidance?: {
+    decrisp?: boolean;
+    variety?: boolean | number;
+  };
   smea?:
     | {
         dyn?: boolean;
@@ -95,6 +101,7 @@ export async function generateImage(
     size = { width: 512, height: 512 },
     qualityTags = true,
     promptGuideRescale = 0,
+    guidance,
     smea,
     limitToFreeInOpus,
     seed,
@@ -164,6 +171,8 @@ export async function generateImage(
       nagativePromptPreset[negativePreset] + (negativePrompt ?? "");
   }
 
+  seed ??= randomInt();
+
   const body = getGenerateImageParams({
     input: prompt,
     steps,
@@ -176,21 +185,27 @@ export async function generateImage(
     smDyn: typeof smea === "boolean" ? false : !!smea?.dyn,
     qualityToggle: !!qualityTags,
     sampler: sampler,
-    seed: seed ?? randomInt(),
+    seed,
+    dynamicThresholding: guidance?.decrisp,
+    // prettier-ignore
+    skipCfgAboveSigma:
+      typeof guidance?.variety === "number" ? guidance.variety
+        : guidance?.variety === true ? SKIP_CFG_ABOVE_SIGMA_VALUE
+        : null,
     cfgRescale: promptGuideRescale,
     ...(img2img
       ? {
           image: (await convertToPng(img2img.image)).buffer,
           strength: img2img.strength,
           noise: img2img.noise,
-          extraNoiseSeed: img2img.noiseSeed ?? randomInt(),
+          extraNoiseSeed: img2img.noiseSeed ?? seed,
         }
       : enhanceImg
       ? {
           image: (await convertToPng(enhanceImg.image)).buffer,
           strength: enhanceImg.strength,
           noise: enhanceImg.noise,
-          extraNoiseSeed: enhanceImg.noiseSeed ?? randomInt(),
+          extraNoiseSeed: enhanceImg.noiseSeed ?? seed,
         }
       : {}),
     ...(vibeTransferMultiple
@@ -257,6 +272,7 @@ type GenerateImageParams = {
   cfgRescale: number;
   controlnetStrength: number;
   dynamicThresholding: boolean;
+  skipCfgAboveSigma: number | null;
   nSamples: number;
   legacy: boolean;
   legacyV3Extend: boolean;
@@ -319,17 +335,18 @@ function getGenerateImageParams(
       cfg_rescale: params.cfgRescale ?? 0,
       controlnet_strength: params.controlnetStrength ?? 1,
       dynamic_thresholding: params.dynamicThresholding ?? true,
+      skip_cfg_above_sigma: params.skipCfgAboveSigma ?? null,
       legacy: params.legacy ?? false,
       legacy_v3_extend: params.legacyV3Extend ?? false,
       n_samples: params.nSamples ?? 1,
       negative_prompt: params.negativePrompt ?? "",
-      params_version: 1,
+      params_version: 3,
       uncond_scale: params.uncondScale ?? 1,
       noise_schedule: params.noiseSchedule ?? "native",
       qualityToggle: params.qualityToggle ?? false,
       sampler: params.sampler ?? "k_euler",
       scale: params.scale ?? 5,
-      seed: parseInt((params.seed ?? 0).toString().slice(0, 10)),
+      seed: params.seed ?? 0,
       sm: params.sm ?? false,
       sm_dyn: params.smDyn ?? false,
       steps: params.steps ?? 28,
