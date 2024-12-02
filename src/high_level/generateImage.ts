@@ -134,6 +134,7 @@ export async function generateImage(
     [width, height] = adjustResolution(width, height, 1024 * 1024);
   }
 
+  // NOTE: 1536x2048 is the maximum resolution for the model
   width = nearest64(width);
   height = nearest64(height);
 

@@ -12,7 +12,11 @@ export type NovelAIDiffusionModels =
 export const NovelAIImageSamplers = {
   Euler: "k_euler",
   EulerAncestral: "k_euler_ancestral",
-};
+  DPMpp_2S_Ancestral: "k_dpmpp_2s_ancestral",
+  DPMpp_2M_SDE: "k_dpmpp_2m_sde",
+  DPMpp_2M: "k_dpmpp_2m",
+} as const;
+
 export type NovelAIImageSamplers =
   (typeof NovelAIImageSamplers)[keyof typeof NovelAIImageSamplers];
 
