@@ -392,9 +392,8 @@ function getGenerateImageParams(
     body.parameters.image = encodeBase64(params.image);
     body.parameters.strength = params.strength ?? 0.5;
     body.parameters.noise = params.noise ?? 0;
-    body.parameters.extra_noise_seed = parseInt(
-      (params.extraNoiseSeed ?? 0).toString().slice(0, 10)
-    );
+    body.parameters.extra_noise_seed =
+      params.extraNoiseSeed ?? params.seed ?? 0;
   }
 
   if ("mask" in params && params.mask) {
