@@ -5,6 +5,22 @@ export type Size = Readonly<{
   height: number;
 }>;
 
+export async function resizeImage(image: Blob | Uint8Array, size: Size) {
+  const bin =
+    image instanceof Blob ? new Uint8Array(await image.arrayBuffer()) : image;
+  const img = await loadImage(bin);
+
+  const c = createCanvas(size.width, size.height);
+  c.getContext("2d").drawImage(img, 0, 0, size.width, size.height);
+  const buffer = c.toBuffer("image/png");
+
+  return new Uint8Array([...buffer]);
+}
+
+export function randomInt() {
+  return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+}
+
 export async function convertToPng(image: Blob | Uint8Array) {
   const img = await loadImage(image);
 

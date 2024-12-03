@@ -1,26 +1,20 @@
 import { fit } from "object-fit-math";
 import { loadImage } from "@napi-rs/canvas";
-import {
-  NovelAIDiffusionModels,
-  NovelAIImageSamplers,
-  apiAiGenerateImage,
-  nearest64,
-} from "../endpoints/ai.ts";
+import { apiAiGenerateImage, nearest64 } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
-import { resizeImage, nagativePromptPreset, randomInt } from "../high_level.ts";
-import { type Size, convertToPng } from "./utils.ts";
-import { adjustResolution } from "./utils.ts";
+import {
+  type Size,
+  convertToPng,
+  resizeImage,
+  adjustResolution,
+  randomInt,
+} from "./utils.ts";
 import { encodeBase64, safeJsonParse } from "../utils.ts";
 import { unzip } from "unzipit";
-
-export const NovelAIImageNegativePromptPreset = {
-  Heavy: "Heavy",
-} as const;
-
-Object.freeze(NovelAIImageNegativePromptPreset);
-
-export type NovelAIImageNegativePromptPreset =
-  (typeof NovelAIImageNegativePromptPreset)[keyof typeof NovelAIImageNegativePromptPreset];
+import type { UCPresetType } from "./consts.ts";
+import { NovelAIDiffusionModels } from "./consts.ts";
+import { NovelAIImageSamplers } from "./consts.ts";
+import { NovelAIImageUCPreset } from "./consts.ts";
 
 export type GenerateImageResponse = {
   params: Record<string, string | object>;
@@ -45,8 +39,8 @@ export type GenerateImageArgs = {
   prompt: string;
   /** 0 to 1 */
   promptGuideRescale?: number;
-  negativePrompt?: string;
-  negativePreset?: NovelAIImageNegativePromptPreset;
+  undesiredContent?: string;
+  negativePreset?: UCPresetType;
   model?: NovelAIDiffusionModels;
   scale?: number;
   steps?: number;
@@ -92,7 +86,7 @@ export async function generateImage(
   session: INovelAISession,
   {
     prompt,
-    negativePrompt,
+    undesiredContent,
     negativePreset,
     model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     sampler = NovelAIImageSamplers.Euler,
@@ -114,6 +108,7 @@ export async function generateImage(
 ): Promise<GenerateImageResponse> {
   let { width, height } = size;
 
+  let i2iImageSize: Size | undefined;
   if (img2img?.keepAspect) {
     const img = await loadImage(
       img2img.image instanceof Blob
@@ -121,29 +116,26 @@ export async function generateImage(
         : img2img.image
     );
 
-    const newSize = fit(
-      { width, height },
-      { width: img.width, height: img.height },
-      "contain"
-    );
-
-    width = Math.round(newSize.width);
-    height = Math.round(newSize.height);
-  }
-
-  if (enhanceImg?.scale != null) {
-    width = Math.round(width * enhanceImg.scale);
-    height = Math.round(height * enhanceImg.scale);
+    i2iImageSize = { width: img.width, height: img.height };
   }
 
   if (limitToFreeInOpus) {
     steps = Math.min(steps, 28);
-    [width, height] = adjustResolution(width, height, 1024 * 1024);
   }
 
   // NOTE: 1536x2048 is the maximum resolution for the model
-  width = nearest64(width);
-  height = nearest64(height);
+  [width, height] = getGenerateResolution({
+    size: { width, height },
+    sourceImage: img2img?.keepAspect
+      ? {
+          width: i2iImageSize?.width!,
+          height: i2iImageSize?.height!,
+          keepAspect: true,
+        }
+      : undefined,
+    enhanceImg,
+    limitToFreeInOpus,
+  });
 
   if (img2img) {
     img2img.image = await resizeImage(img2img.image, { width, height });
@@ -167,8 +159,8 @@ export async function generateImage(
   }
 
   if (negativePreset) {
-    negativePrompt =
-      nagativePromptPreset[negativePreset] + (negativePrompt ?? "");
+    undesiredContent =
+      NovelAIImageUCPreset[negativePreset] + (undesiredContent ?? "");
   }
 
   seed ??= randomInt();
@@ -178,7 +170,7 @@ export async function generateImage(
     steps,
     width,
     height,
-    negativePrompt,
+    negativePrompt: undesiredContent ?? "",
     model,
     scale,
     sm: !!smea,
@@ -262,6 +254,44 @@ export async function generateImage(
   }
 
   return { params: body, files: images };
+}
+
+export function getGenerateResolution({
+  sourceImage,
+  size: { width, height } = { width: 512, height: 512 },
+  enhanceImg,
+  limitToFreeInOpus,
+}: {
+  sourceImage?: Size & { keepAspect?: boolean };
+  size?: Size;
+  enhanceImg?: Img2ImgImage & { scale: number };
+  limitToFreeInOpus?: boolean;
+}): [width: number, height: number] {
+  if (sourceImage?.keepAspect) {
+    const newSize = fit(
+      { width, height },
+      { width: sourceImage.width, height: sourceImage.height },
+      "contain"
+    );
+
+    width = Math.round(newSize.width);
+    height = Math.round(newSize.height);
+  }
+
+  if (enhanceImg?.scale != null) {
+    width = Math.round(width * enhanceImg.scale);
+    height = Math.round(height * enhanceImg.scale);
+  }
+
+  if (limitToFreeInOpus) {
+    [width, height] = adjustResolution(width, height, 1024 * 1024);
+  }
+
+  // NOTE: 1536x2048 is the maximum resolution for the model
+  width = nearest64(width);
+  height = nearest64(height);
+
+  return [width, height];
 }
 
 type GenerateImageParams = {

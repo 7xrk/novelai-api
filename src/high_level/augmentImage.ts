@@ -1,42 +1,12 @@
-import { unzip } from "npm:unzipit@^1.4.3";
-import {
-  NovelAIAugmentImageRequestTypes,
-  apiAiAugmentImage,
-  nearest64,
-} from "../endpoints/ai.ts";
+import { unzip } from "unzipit";
+import { apiAiAugmentImage, nearest64 } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import { safeJsonParse } from "../utils.ts";
 import { type Size, adjustResolution, convertToPng } from "./utils.ts";
-export const NovelAIImageAugmentEmotionType = {
-  neutral: "neutral",
-  happy: "happy",
-  sad: "sad",
-  angry: "angry",
-  scared: "scared",
-  surprized: "surprized",
-  tired: "tired",
-  excited: "excited",
-  nervous: "nervous",
-  thinking: "thinking",
-  confused: "confused",
-  shy: "shy",
-  disgusted: "disgusted",
-  smug: "smug",
-  bored: "bored",
-  laguhing: "laguhing",
-  irritated: "irritated",
-  aroused: "aroused",
-  embarrassed: "embarrassed",
-  worried: "worried",
-  love: "love",
-  determined: "determined",
-  hurt: "hurt",
-  playful: "playful",
-} as const;
-
-export type NovelAIImageAugmentEmotionType =
-  (typeof NovelAIImageAugmentEmotionType)[keyof typeof NovelAIImageAugmentEmotionType];
-export type { NovelAIAugmentImageRequestTypes };
+import {
+  NovelAIAugmentImageRequestTypes,
+  type NovelAIImageAugmentEmotionType,
+} from "./consts.ts";
 
 type EmotionAugmentParam = {
   reqType: typeof NovelAIAugmentImageRequestTypes.emotion;

@@ -18,7 +18,7 @@ console.log("generating");
 const result = await generateImage(session, {
   limitToFreeInOpus: true,
   prompt: outdent`1girl,{{{best quality, amazing quality, very aesthetic}}}`,
-  negativePrompt: outdent`worst quality`,
+  undesiredContent: outdent`worst quality`,
   model: NovelAIDiffusionModels.NAIDiffusionAnimeV3,
   size: NovelAIImageSizePreset.NORMAL_LANDSCAPE,
   smea: { dyn: true },
