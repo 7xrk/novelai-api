@@ -37,8 +37,6 @@ export abstract class NovelAISession implements INovelAISession {
     password: string
   ): Promise<{ accessToken: string | null }> {
     const accessKey = await this.getAccessKey(email, password);
-    console.log({ accessKey });
-
     const res = await fetch(endpoint("/user/login"), {
       method: "POST",
       body: JSON.stringify({ key: accessKey }),

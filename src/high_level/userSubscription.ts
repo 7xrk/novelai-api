@@ -45,7 +45,8 @@ export async function userSubscription(
   const res = await apiUserSubscription(session);
 
   if (!res.ok) {
-    throw new Error(`Failed to get user subscription: ${res.statusText}`);
+    const body = await res.text();
+    throw new Error(`Failed to get user subscription: ${body}`);
   }
 
   return await res.json();

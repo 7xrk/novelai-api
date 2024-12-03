@@ -1,33 +1,9 @@
+import type {
+  NovelAIAugmentImageRequestTypes,
+  NovelAIDiffusionModels,
+} from "../high_level/consts.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import { encodeBase64, rescue } from "../utils.ts";
-
-export const NovelAIDiffusionModels = {
-  NAIDiffusionAnimeV3: "nai-diffusion-3",
-  NAIDiffusionAnimeV3Inpainting: "nai-diffusion-3-inpainting",
-} as const;
-
-export type NovelAIDiffusionModels =
-  (typeof NovelAIDiffusionModels)[keyof typeof NovelAIDiffusionModels];
-
-export const NovelAIImageSamplers = {
-  Euler: "k_euler",
-  EulerAncestral: "k_euler_ancestral",
-  DPMpp_2S_Ancestral: "k_dpmpp_2s_ancestral",
-  DPMpp_2M_SDE: "k_dpmpp_2m_sde",
-  DPMpp_2M: "k_dpmpp_2m",
-} as const;
-
-export type NovelAIImageSamplers =
-  (typeof NovelAIImageSamplers)[keyof typeof NovelAIImageSamplers];
-
-export const NovelAIAugmentImageRequestTypes = {
-  sketch: "sketch",
-  lineArt: "lineart",
-  emotion: "emotion",
-  colorize: "colorize",
-} as const;
-export type NovelAIAugmentImageRequestTypes =
-  (typeof NovelAIAugmentImageRequestTypes)[keyof typeof NovelAIAugmentImageRequestTypes];
 
 /** for resolution value */
 export function nearest64(n: number) {
