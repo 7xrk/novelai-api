@@ -153,24 +153,28 @@ export async function generateImage(
     }
   }
 
+  let finalPrompt = prompt;
+  let finalUndesired = undesiredContent ?? "";
+
   if (qualityTags) {
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3)
-      prompt += ", best quality, amazing quality, very aesthetic, absurdres";
+      finalPrompt +=
+        ", best quality, amazing quality, very aesthetic, absurdres";
   }
 
   if (negativePreset) {
-    undesiredContent =
-      NovelAIImageUCPreset[negativePreset] + (undesiredContent ?? "");
+    finalUndesired =
+      NovelAIImageUCPreset[negativePreset] + (finalUndesired ?? "");
   }
 
   seed ??= randomInt();
 
   const body = getGenerateImageParams({
-    input: prompt,
+    input: finalPrompt,
     steps,
     width,
     height,
-    negativePrompt: undesiredContent ?? "",
+    negativePrompt: finalUndesired,
     model,
     scale,
     sm: !!smea,
@@ -253,7 +257,14 @@ export async function generateImage(
     images.push(new Blob([await entry.arrayBuffer()], { type: "image/png" }));
   }
 
-  return { params: body, files: images };
+  return {
+    params: {
+      ...body,
+      input_original: prompt,
+      negative_prompt_original: undesiredContent,
+    },
+    files: images,
+  };
 }
 
 export function getGenerateResolution({
