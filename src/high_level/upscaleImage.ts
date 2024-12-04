@@ -8,17 +8,17 @@ export async function upscaleImage(
   session: INovelAISession,
   {
     image,
-    scale,
+    scaleBy,
   }: {
     /** NovelAI generated raw png binary */
     image: Uint8Array;
-    scale: number;
+    scaleBy: number;
   }
 ): Promise<{
   image: Blob;
 }> {
-  if (scale !== 2 && scale !== 4) {
-    throw new Error(`Invalid scale, expected 2 or 4 but got ${scale}`);
+  if (scaleBy !== 2 && scaleBy !== 4) {
+    throw new Error(`Invalid scale, expected 2 or 4 but got ${scaleBy}`);
   }
 
   const png = await convertToPng(image);
@@ -27,7 +27,7 @@ export async function upscaleImage(
     image,
     width: png.imageSize.width,
     height: png.imageSize.height,
-    scale,
+    scale: scaleBy,
   });
 
   if (!res.ok) {

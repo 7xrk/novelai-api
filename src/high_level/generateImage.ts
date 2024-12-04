@@ -59,7 +59,7 @@ export type GenerateImageArgs = {
       }
     | boolean;
   img2img?: Img2ImgImage;
-  enhanceImg?: Img2ImgImage & { scale: number };
+  enhanceImg?: Img2ImgImage & { scaleBy: number };
   vibeTransfer?: {
     /** any image type blob */
     image: Blob | Uint8Array;
@@ -275,7 +275,7 @@ export function getGenerateResolution({
 }: {
   sourceImage?: Size & { keepAspect?: boolean };
   size?: Size;
-  enhanceImg?: Img2ImgImage & { scale: number };
+  enhanceImg?: Img2ImgImage & { scaleBy: number };
   limitToFreeInOpus?: boolean;
 }): [width: number, height: number] {
   if (sourceImage?.keepAspect) {
@@ -289,9 +289,9 @@ export function getGenerateResolution({
     height = Math.round(newSize.height);
   }
 
-  if (enhanceImg?.scale != null) {
-    width = Math.round(width * enhanceImg.scale);
-    height = Math.round(height * enhanceImg.scale);
+  if (enhanceImg?.scaleBy != null) {
+    width = Math.round(width * enhanceImg.scaleBy);
+    height = Math.round(height * enhanceImg.scaleBy);
   }
 
   if (limitToFreeInOpus) {
