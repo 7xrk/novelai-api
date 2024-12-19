@@ -18,6 +18,7 @@ export {
   NovelAIAugmentImageRequestTypes,
   NovelAIImageAugmentEmotionType,
   UCPresetType,
+  NovelAIImageExtraPresetType,
 } from "./src/high_level/consts.ts";
 
 export * as novelaiApi from "./src/api.ts";

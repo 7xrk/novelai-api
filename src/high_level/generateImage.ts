@@ -11,8 +11,8 @@ import {
 } from "./utils.ts";
 import { encodeBase64, safeJsonParse } from "../utils.ts";
 import { unzip } from "unzipit";
-import type { UCPresetType } from "./consts.ts";
-import { NovelAIDiffusionModels } from "./consts.ts";
+import type { NovelAIImageExtraPresetType, UCPresetType } from "./consts.ts";
+import { NovelAIAImageExtraPresets, NovelAIDiffusionModels } from "./consts.ts";
 import { NovelAIImageSamplers } from "./consts.ts";
 import { NovelAIImageUCPreset } from "./consts.ts";
 
@@ -41,12 +41,13 @@ export type GenerateImageArgs = {
   promptGuideRescale?: number;
   undesiredContent?: string;
   negativePreset?: UCPresetType;
+  qualityTags?: boolean;
+  extraPreset?: keyof typeof NovelAIImageExtraPresetType;
   model?: NovelAIDiffusionModels;
   scale?: number;
   steps?: number;
   size?: Size;
   limitToFreeInOpus?: boolean;
-  qualityTags?: boolean;
   sampler?: NovelAIImageSamplers;
   seed?: number;
   guidance?: {
@@ -90,6 +91,7 @@ export async function generateImage(
     negativePreset,
     model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     sampler = NovelAIImageSamplers.Euler,
+    extraPreset,
     scale = 5,
     steps = 28,
     size = { width: 512, height: 512 },
@@ -155,6 +157,11 @@ export async function generateImage(
 
   let finalPrompt = prompt;
   let finalUndesired = undesiredContent ?? "";
+
+  if (extraPreset) {
+    const presetPrompt = NovelAIAImageExtraPresets[extraPreset];
+    finalPrompt += presetPrompt;
+  }
 
   if (qualityTags) {
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3)

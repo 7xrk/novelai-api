@@ -115,3 +115,16 @@ export const UCPresetType = {
 Object.freeze(UCPresetType);
 
 export type UCPresetType = (typeof UCPresetType)[keyof typeof UCPresetType];
+
+export const NovelAIAImageExtraPresets = {
+  HolidaySprits2024: ",{{{{snowing, holly, christmas tree, christmas}}}}",
+};
+Object.freeze(NovelAIAImageExtraPresets);
+
+export const NovelAIImageExtraPresetType = {
+  HolidaySprits2024: "HolidaySprits2024",
+};
+Object.freeze(NovelAIImageExtraPresetType);
+
+export type NovelAIImageExtraPresetType =
+  (typeof NovelAIImageUCPreset)[keyof typeof NovelAIImageUCPreset];
