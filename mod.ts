@@ -17,7 +17,7 @@ export {
   NovelAIImageSamplers,
   NovelAIAugmentImageRequestTypes,
   NovelAIImageAugmentEmotionType,
-  UCPresetType,
+  NovelAIImageUCPresetType,
   NovelAIImageExtraPresetType,
 } from "./src/high_level/consts.ts";
 

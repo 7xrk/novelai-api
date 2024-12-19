@@ -106,15 +106,16 @@ Object.freeze(NovelAIImageAugmentEmotionType);
 export type NovelAIImageAugmentEmotionType =
   (typeof NovelAIImageAugmentEmotionType)[keyof typeof NovelAIImageAugmentEmotionType];
 
-export const UCPresetType = {
+export const NovelAIImageUCPresetType = {
   Heavy: "Heavy",
   Light: "Light",
   HumanFocus: "HumanFocus",
   None: "None",
 } as const;
-Object.freeze(UCPresetType);
+Object.freeze(NovelAIImageUCPresetType);
 
-export type UCPresetType = (typeof UCPresetType)[keyof typeof UCPresetType];
+export type NovelAIImageUCPresetType =
+  (typeof NovelAIImageUCPresetType)[keyof typeof NovelAIImageUCPresetType];
 
 export const NovelAIAImageExtraPresets = {
   HolidaySprits2024: ",{{{{snowing, holly, christmas tree, christmas}}}}",

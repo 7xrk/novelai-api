@@ -11,7 +11,10 @@ import {
 } from "./utils.ts";
 import { encodeBase64, safeJsonParse } from "../utils.ts";
 import { unzip } from "unzipit";
-import type { NovelAIImageExtraPresetType, UCPresetType } from "./consts.ts";
+import type {
+  NovelAIImageExtraPresetType,
+  NovelAIImageUCPresetType,
+} from "./consts.ts";
 import { NovelAIAImageExtraPresets, NovelAIDiffusionModels } from "./consts.ts";
 import { NovelAIImageSamplers } from "./consts.ts";
 import { NovelAIImageUCPreset } from "./consts.ts";
@@ -40,7 +43,7 @@ export type GenerateImageArgs = {
   /** 0 to 1 */
   promptGuideRescale?: number;
   undesiredContent?: string;
-  negativePreset?: UCPresetType;
+  negativePreset?: NovelAIImageUCPresetType;
   qualityTags?: boolean;
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
   model?: NovelAIDiffusionModels;
