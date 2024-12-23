@@ -188,6 +188,9 @@ export async function generateImage(
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3)
       finalPrompt +=
         ", best quality, amazing quality, very aesthetic, absurdres";
+    else if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview)
+      finalPrompt +=
+        ", rating:general, best quality, very aesthetic, absurdres";
   }
 
   if (negativePreset) {
@@ -449,7 +452,7 @@ function getGenerateImageParams(
   };
 
   if (params.characterPrompts?.length) {
-    body.parameters.use_coords = false;
+    body.parameters.use_coords = true;
     body.parameters.prefer_brownian = true;
 
     body.parameters.characterPrompts = params.characterPrompts.map((v) => ({
@@ -476,7 +479,7 @@ function getGenerateImageParams(
           centers: [v.center ?? { x: 0.5, y: 0.5 }],
         })),
       },
-      use_coords: false,
+      use_coords: true,
       use_order: true,
     };
   }
