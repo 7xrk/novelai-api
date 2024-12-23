@@ -196,6 +196,14 @@ export async function generateImage(
 
   seed ??= randomInt();
 
+  const v4PreviewOverride =
+    model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview
+      ? {
+          sm: false,
+          smDyn: false,
+        }
+      : {};
+
   const body = getGenerateImageParams({
     input: finalPrompt,
     steps,
@@ -259,6 +267,7 @@ export async function generateImage(
           addOriginalImage: inpainting.overlayOriginalImage,
         }
       : {}),
+    ...v4PreviewOverride,
   });
 
   const res = await apiAiGenerateImage(session, body);
@@ -430,7 +439,7 @@ function getGenerateImageParams(
     body.parameters.use_coords = false;
     body.parameters.prefer_brownian = true;
 
-    body.parameters.character_prompts = params.characterPrompts.map((v) => ({
+    body.parameters.characterPrompts = params.characterPrompts.map((v) => ({
       prompt: v.prompt,
       center: v.center ?? { x: 0.5, y: 0.5 },
       uc: v.uc ?? "",
