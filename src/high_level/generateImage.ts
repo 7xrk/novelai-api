@@ -38,12 +38,19 @@ type Img2ImgImage = {
   keepAspect?: boolean;
 };
 
+type CharacterPrompt = {
+  prompt: string;
+  center?: { x: number; y: number };
+  uc?: string;
+};
+
 export type GenerateImageArgs = {
   prompt: string;
   /** 0 to 1 */
   promptGuideRescale?: number;
   undesiredContent?: string;
   negativePreset?: NovelAIImageUCPresetType;
+  experimental_characterPrompts?: Array<CharacterPrompt>;
   qualityTags?: boolean;
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
   model?: NovelAIDiffusionModels;
@@ -94,6 +101,7 @@ export async function generateImage(
     negativePreset,
     model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     sampler = NovelAIImageSamplers.Euler,
+    experimental_characterPrompts,
     extraPreset,
     scale = 5,
     steps = 28,
@@ -112,6 +120,15 @@ export async function generateImage(
   }: GenerateImageArgs
 ): Promise<GenerateImageResponse> {
   let { width, height } = size;
+
+  if (
+    model !== NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview &&
+    experimental_characterPrompts
+  ) {
+    throw new Error(
+      "experimental_characterPrompts is only supported with NAIDiffusionV4CuratedPreview model"
+    );
+  }
 
   let i2iImageSize: Size | undefined;
   if (img2img?.keepAspect) {
@@ -185,6 +202,7 @@ export async function generateImage(
     width,
     height,
     negativePrompt: finalUndesired,
+    characterPrompts: experimental_characterPrompts ?? [],
     model,
     scale,
     sm: !!smea,
@@ -319,6 +337,8 @@ type GenerateImageParams = {
   action: "generate" | "img2img" | "infill";
   input: string;
   model: NovelAIDiffusionModels;
+  characterPrompts: Array<CharacterPrompt>;
+
   /** Prompt Guidance Rescale */
   cfgRescale: number;
   controlnetStrength: number;
@@ -405,6 +425,39 @@ function getGenerateImageParams(
       height: nearest64(params.height ?? 512),
     },
   };
+
+  if (params.characterPrompts?.length) {
+    body.parameters.use_coords = false;
+    body.parameters.prefer_brownian = true;
+
+    body.parameters.character_prompts = params.characterPrompts.map((v) => ({
+      prompt: v.prompt,
+      center: v.center ?? { x: 0.5, y: 0.5 },
+      uc: v.uc ?? "",
+    }));
+
+    body.parameters.v4_negative_prompt = {
+      caption: {
+        base_caption: params.input ?? "",
+        char_captions: params.characterPrompts.map((v) => ({
+          char_caption: v.uc ?? "",
+          centers: [v.center ?? { x: 0.5, y: 0.5 }],
+        })),
+      },
+    };
+
+    body.parameters.v4_prompt = {
+      caption: {
+        base_caption: params.input ?? "",
+        char_captions: params.characterPrompts.map((v) => ({
+          char_caption: v.prompt ?? "",
+          centers: [v.center ?? { x: 0.5, y: 0.5 }],
+        })),
+      },
+      use_coords: false,
+      use_order: true,
+    };
+  }
 
   if ("referenceImageMultiple" in params && params.referenceImageMultiple) {
     if (

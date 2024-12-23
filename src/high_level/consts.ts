@@ -35,6 +35,7 @@ export type NovelAIImageSizePreset = {
 export const NovelAIDiffusionModels = {
   NAIDiffusionAnimeV3: "nai-diffusion-3",
   NAIDiffusionAnimeV3Inpainting: "nai-diffusion-3-inpainting",
+  NAIDiffusionV4CuratedPreview: "nai-diffusion-4-curated-preview",
 } as const;
 Object.freeze(NovelAIDiffusionModels);
 
