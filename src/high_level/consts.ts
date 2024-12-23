@@ -78,9 +78,9 @@ Object.freeze(NovelAIImageUCPreset);
 
 export const NovelAIImageUCPresetV4CuratedPreview = {
   Heavy:
-    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts,",
+    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts, ",
   Light:
-    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, logo, dated, signature,",
+    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, logo, dated, signature, ",
   None: "",
 } as const;
 Object.freeze(NovelAIImageUCPresetV4CuratedPreview);
