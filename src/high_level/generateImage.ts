@@ -460,7 +460,7 @@ function getGenerateImageParams(
 
     body.parameters.v4_negative_prompt = {
       caption: {
-        base_caption: params.input ?? "",
+        base_caption: params.negativePrompt ?? "",
         char_captions: params.characterPrompts.map((v) => ({
           char_caption: v.uc ?? "",
           centers: [v.center ?? { x: 0.5, y: 0.5 }],
