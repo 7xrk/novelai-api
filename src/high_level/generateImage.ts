@@ -451,11 +451,13 @@ function getGenerateImageParams(
     },
   };
 
-  if (params.characterPrompts?.length) {
+  if (body.model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
     body.parameters.use_coords = true;
     body.parameters.prefer_brownian = true;
 
-    body.parameters.characterPrompts = params.characterPrompts.map((v) => ({
+    const characterPrompts = params.characterPrompts ?? [];
+
+    body.parameters.characterPrompts = characterPrompts.map((v) => ({
       prompt: v.prompt,
       center: v.center ?? { x: 0.5, y: 0.5 },
       uc: v.uc ?? "",
@@ -464,7 +466,7 @@ function getGenerateImageParams(
     body.parameters.v4_negative_prompt = {
       caption: {
         base_caption: params.negativePrompt ?? "",
-        char_captions: params.characterPrompts.map((v) => ({
+        char_captions: characterPrompts.map((v) => ({
           char_caption: v.uc ?? "",
           centers: [v.center ?? { x: 0.5, y: 0.5 }],
         })),
@@ -474,7 +476,7 @@ function getGenerateImageParams(
     body.parameters.v4_prompt = {
       caption: {
         base_caption: params.input ?? "",
-        char_captions: params.characterPrompts.map((v) => ({
+        char_captions: characterPrompts.map((v) => ({
           char_caption: v.prompt ?? "",
           centers: [v.center ?? { x: 0.5, y: 0.5 }],
         })),
