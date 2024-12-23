@@ -17,6 +17,7 @@ import type {
 } from "./consts.ts";
 import { NovelAIAImageExtraPresets, NovelAIDiffusionModels } from "./consts.ts";
 import { NovelAIImageSamplers } from "./consts.ts";
+import { NovelAIImageUCPresetV4CuratedPreview } from "./consts.ts";
 import { NovelAIImageUCPreset } from "./consts.ts";
 
 export type GenerateImageResponse = {
@@ -190,8 +191,20 @@ export async function generateImage(
   }
 
   if (negativePreset) {
-    finalUndesired =
-      NovelAIImageUCPreset[negativePreset] + (finalUndesired ?? "");
+    if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
+      if (
+        negativePreset === "Heavy" ||
+        negativePreset === "Light" ||
+        negativePreset === "None"
+      ) {
+        finalUndesired =
+          NovelAIImageUCPresetV4CuratedPreview[negativePreset] +
+          (finalUndesired ?? "");
+      }
+    } else {
+      finalUndesired =
+        NovelAIImageUCPreset[negativePreset] + (finalUndesired ?? "");
+    }
   }
 
   seed ??= randomInt();

@@ -69,12 +69,21 @@ export const NovelAIImageUCPreset = {
   Heavy:
     "lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract],",
   Light:
-    "nsfw, lowres, jpeg artifacts, worst quality, watermark, blurry, very displeasing",
+    "nsfw, lowres, jpeg artifacts, worst quality, watermark, blurry, very displeasing,",
   HumanFocus:
-    "nsfw, lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract], bad anatomy, bad hands, @_@, mismatched pupils, heart-shaped pupils, glowing eyes",
+    "nsfw, lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract], bad anatomy, bad hands, @_@, mismatched pupils, heart-shaped pupils, glowing eyes,",
   None: "lowres",
 } as const;
 Object.freeze(NovelAIImageUCPreset);
+
+export const NovelAIImageUCPresetV4CuratedPreview = {
+  Heavy:
+    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts,",
+  Light:
+    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, logo, dated, signature,",
+  None: "",
+} as const;
+Object.freeze(NovelAIImageUCPresetV4CuratedPreview);
 
 export const NovelAIImageAugmentEmotionType = {
   neutral: "neutral",
