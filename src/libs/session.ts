@@ -13,6 +13,7 @@ export function createNovelAISessionClass(
 
 export interface NovelAISessionClass {
   new (params?: { accessToken?: string }): INovelAISession;
+  login(email: string, password: string): Promise<INovelAISession>;
 }
 
 export interface INovelAISession {
@@ -25,11 +26,25 @@ export interface INovelAISession {
 }
 
 export abstract class NovelAISession implements INovelAISession {
-  protected accessToken: string | null = null;
+  #accessToken: string | null = null;
   protected abstract argonHash: ArgonHashFn;
 
   constructor({ accessToken }: { accessToken?: string } = {}) {
-    this.accessToken = accessToken ?? null;
+    this.#accessToken = accessToken ?? null;
+  }
+
+  public static async login(
+    this: NovelAISessionClass,
+    email: string,
+    password: string
+  ): Promise<INovelAISession> {
+    const session = new this();
+    await session.login(email, password);
+    return session;
+  }
+
+  public get accessToken(): string | null {
+    return this.#accessToken;
   }
 
   public async login(
@@ -51,7 +66,7 @@ export abstract class NovelAISession implements INovelAISession {
     }
 
     const body = await res.json();
-    this.accessToken = body.accessToken;
+    this.#accessToken = body.accessToken;
 
     return { accessToken: this.accessToken };
   }

@@ -50,7 +50,7 @@ export type GenerateImageArgs = {
   /** 0 to 1 */
   promptGuideRescale?: number;
   undesiredContent?: string;
-  negativePreset?: NovelAIImageUCPresetType;
+  ucPreset?: NovelAIImageUCPresetType;
   experimental_characterPrompts?: Array<CharacterPrompt>;
   qualityTags?: boolean;
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
@@ -58,6 +58,7 @@ export type GenerateImageArgs = {
   scale?: number;
   steps?: number;
   size?: Size;
+  nSamples?: number;
   limitToFreeInOpus?: boolean;
   sampler?: NovelAIImageSamplers;
   seed?: number;
@@ -99,7 +100,7 @@ export async function generateImage(
   {
     prompt,
     undesiredContent,
-    negativePreset,
+    ucPreset,
     model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     sampler = NovelAIImageSamplers.Euler,
     experimental_characterPrompts,
@@ -107,6 +108,7 @@ export async function generateImage(
     scale = 5,
     steps = 28,
     size = { width: 512, height: 512 },
+    nSamples,
     qualityTags = true,
     promptGuideRescale = 0,
     guidance,
@@ -193,23 +195,17 @@ export async function generateImage(
         ", rating:general, best quality, very aesthetic, absurdres";
   }
 
-  if (negativePreset) {
+  if (ucPreset) {
     if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
-      if (
-        negativePreset === "Heavy" ||
-        negativePreset === "Light" ||
-        negativePreset === "None"
-      ) {
+      if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
         finalUndesired =
-          NovelAIImageUCPresetV4CuratedPreview[negativePreset] +
+          NovelAIImageUCPresetV4CuratedPreview[ucPreset] +
           (finalUndesired ?? "");
       }
     } else {
-      finalUndesired =
-        NovelAIImageUCPreset[negativePreset] + (finalUndesired ?? "");
+      finalUndesired = NovelAIImageUCPreset[ucPreset] + (finalUndesired ?? "");
     }
   }
-
   seed ??= randomInt();
 
   const v4PreviewOverride =
@@ -223,6 +219,7 @@ export async function generateImage(
   const body = getGenerateImageParams({
     input: finalPrompt,
     steps,
+    nSamples,
     width,
     height,
     negativePrompt: finalUndesired,
