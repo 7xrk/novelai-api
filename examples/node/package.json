@@ -1,6 +1,12 @@
 {
+  "scripts": {
+    "example": "node --experimental-strip-types example_node.ts"
+  },
   "dependencies": {
     "@7xrk/novelai-api": "npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.8",
     "outdent": "^0.8.0"
+  },
+  "volta": {
+    "node": "22.12.0"
   }
 }

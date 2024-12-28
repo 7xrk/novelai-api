@@ -5,16 +5,17 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@7xrk/novelai-api@npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.7":
-  version: 1.0.3-alpha.7
-  resolution: "@jsr/7xrk__novelai-api@npm:1.0.3-alpha.7::__archiveUrl=https%3A%2F%2Fnpm.jsr.io%2F~%2F11%2F%40jsr%2F7xrk__novelai-api%2F1.0.3-alpha.7.tgz"
+"@7xrk/novelai-api@npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.8":
+  version: 1.0.3-alpha.8
+  resolution: "@jsr/7xrk__novelai-api@npm:1.0.3-alpha.8::__archiveUrl=https%3A%2F%2Fnpm.jsr.io%2F~%2F11%2F%40jsr%2F7xrk__novelai-api%2F1.0.3-alpha.8.tgz"
   dependencies:
     "@jsr/denosaurs__argontwo": "npm:^0.2.0"
     "@jsr/rabbit-company__blake2b": "npm:^2.1.1"
+    "@jsr/std__encoding": "npm:^1.0.6"
     "@napi-rs/canvas": "npm:^0.1.64"
     object-fit-math: "npm:^1.0.0"
     unzipit: "npm:^1.4.3"
-  checksum: 10c0/ec2445b47b430ddb6923a91f0c4c2c245340e556bfb2db18f77aac96be2e74a6f60b094204dbed62ab784fa4bb4a305222d9ce59c388c72bfac3f82285ab1214
+  checksum: 10c0/e462fce4b3ffff1a52f6cc756bb2073bafd64f3d2a96b3d4efa7dc4d967a3d3db0e580043503beb4bb232dbda0b298be700a0578d69797e83e3abdd2297a3dca
   languageName: node
   linkType: hard
 
@@ -46,6 +47,13 @@ __metadata:
   version: 0.221.0
   resolution: "@jsr/std__encoding@npm:0.221.0::__archiveUrl=https%3A%2F%2Fnpm.jsr.io%2F~%2F11%2F%40jsr%2Fstd__encoding%2F0.221.0.tgz"
   checksum: 10c0/f88dda11ddbd14b508b4e4e521dcc2c0725da726ed5410609d0901fdef678c81887655e914eaff48b8d14bdfbb89e1deb5121330af898ac27298436611dfa09d
+  languageName: node
+  linkType: hard
+
+"@jsr/std__encoding@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@jsr/std__encoding@npm:1.0.6::__archiveUrl=https%3A%2F%2Fnpm.jsr.io%2F~%2F11%2F%40jsr%2Fstd__encoding%2F1.0.6.tgz"
+  checksum: 10c0/863a7ae314efba5de6b1e92b36c9a441db9b66b8d2ee4d0cd3b6af903a3e89bd68d8fc21dfb6807112efb93b42edc2390bc7ee941ad82aae4f140f537940de6b
   languageName: node
   linkType: hard
 
@@ -158,6 +166,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^16.4.7":
+  version: 16.4.7
+  resolution: "dotenv@npm:16.4.7"
+  checksum: 10c0/be9f597e36a8daf834452daa1f4cc30e5375a5968f98f46d89b16b983c567398a330580c88395069a77473943c06b877d1ca25b4afafcdd6d4adb549e8293462
+  languageName: node
+  linkType: hard
+
 "object-fit-math@npm:^1.0.0":
   version: 1.0.0
   resolution: "object-fit-math@npm:1.0.0"
@@ -176,7 +191,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@7xrk/novelai-api": "npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.7"
+    "@7xrk/novelai-api": "npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.8"
+    dotenv: "npm:^16.4.7"
     outdent: "npm:^0.8.0"
   languageName: unknown
   linkType: soft
