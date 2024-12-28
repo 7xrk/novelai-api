@@ -1,20 +1,4 @@
-const encoder = new TextEncoder();
-
-function validateBinaryLike(source: unknown) {
-  if (typeof source === "string") return encoder.encode(source);
-  if (source instanceof Uint8Array) return source;
-  if (source instanceof ArrayBuffer) return new Uint8Array(source);
-  throw new Error("Invalid input type");
-}
-
-export function encodeBase64(data: ArrayBuffer | Uint8Array | string): string {
-  const uint8 = validateBinaryLike(data);
-  let chars = "";
-  for (let i = 0; i < uint8.length; i++) {
-    chars += String.fromCharCode(uint8[i]);
-  }
-  return btoa(chars);
-}
+export { encodeBase64 } from "@std/encoding/base64";
 
 type Result<T, E = unknown> =
   | ({

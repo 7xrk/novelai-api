@@ -13,7 +13,7 @@
     }
   },
   "imports": {
-    "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
+    "@std/encoding": "jsr:@std/encoding@^1.0.6",
     "@denosaurs/argontwo": "jsr:@denosaurs/argontwo@^0.2.0",
     "@napi-rs/canvas": "npm:@napi-rs/canvas@^0.1.64",
     "@rabbit-company/blake2b": "jsr:@rabbit-company/blake2b@^2.1.1",

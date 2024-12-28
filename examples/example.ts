@@ -10,8 +10,7 @@ import {
 
 const env = await load();
 
-const session = new NovelAISession();
-await session.login(env["NAI_USER"], env["NAI_PASS"]);
+const session = await NovelAISession.login(env["NAI_USER"], env["NAI_PASS"]);
 
 Deno.mkdirSync("./tmp", { recursive: true });
 

@@ -1,13 +1,7 @@
 import Blake2b from "@rabbit-company/blake2b";
 import { hash as argon2d } from "@denosaurs/argontwo";
 import { encodeBase64 } from "../utils.ts";
-
-export type ArgonHashFn = (
-  email: string,
-  password: string,
-  size: number,
-  domain: string
-) => Promise<string>;
+import { decodeHex } from "@std/encoding/hex";
 
 export function argonHash(
   email: string,
@@ -19,15 +13,9 @@ export function argonHash(
 
   // Salt
   const preSalt = `${password.substring(0, 6)}${email}${domain}`;
-  const salt = Blake2b.hash(
-    enc.encode(preSalt),
-    undefined,
-    16,
-    undefined,
-    undefined
-  );
+  const salt = Blake2b.hash(preSalt, undefined, 16, undefined, undefined);
 
-  const raw = argon2d(enc.encode(password), enc.encode(salt), {
+  const raw = argon2d(enc.encode(password), decodeHex(salt), {
     tCost: 2,
     mCost: 2000000 / 1024,
     algorithm: "Argon2id",

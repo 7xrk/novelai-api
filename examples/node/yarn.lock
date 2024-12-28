@@ -5,16 +5,16 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@7xrk/novelai-api@npm:@jsr/7xrk__novelai-api@^1.0.2":
-  version: 1.0.2
-  resolution: "@jsr/7xrk__novelai-api@npm:1.0.2::__archiveUrl=https%3A%2F%2Fnpm.jsr.io%2F~%2F11%2F%40jsr%2F7xrk__novelai-api%2F1.0.2.tgz"
+"@7xrk/novelai-api@npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.7":
+  version: 1.0.3-alpha.7
+  resolution: "@jsr/7xrk__novelai-api@npm:1.0.3-alpha.7::__archiveUrl=https%3A%2F%2Fnpm.jsr.io%2F~%2F11%2F%40jsr%2F7xrk__novelai-api%2F1.0.3-alpha.7.tgz"
   dependencies:
     "@jsr/denosaurs__argontwo": "npm:^0.2.0"
     "@jsr/rabbit-company__blake2b": "npm:^2.1.1"
     "@napi-rs/canvas": "npm:^0.1.64"
     object-fit-math: "npm:^1.0.0"
     unzipit: "npm:^1.4.3"
-  checksum: 10c0/1752a21633c821ec274ce47a03daa2121a4cb23e44eb202047d9ce26894f4cac5c371ba94033cf96f1b0a6c1fd245fccaaa1f1f9c9a4ffb998b754d8a62b1c48
+  checksum: 10c0/ec2445b47b430ddb6923a91f0c4c2c245340e556bfb2db18f77aac96be2e74a6f60b094204dbed62ab784fa4bb4a305222d9ce59c388c72bfac3f82285ab1214
   languageName: node
   linkType: hard
 
@@ -176,7 +176,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@7xrk/novelai-api": "npm:@jsr/7xrk__novelai-api@^1.0.2"
+    "@7xrk/novelai-api": "npm:@jsr/7xrk__novelai-api@^1.0.3-alpha.7"
     outdent: "npm:^0.8.0"
   languageName: unknown
   linkType: soft
