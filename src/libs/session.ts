@@ -1,20 +1,7 @@
-import type { ArgonHashFn } from "./argonHash.deno.ts";
+import { argonHash } from "./argonHash.deno.ts";
 
 const endpoint = (path: string | URL) =>
   new URL(path, "https://api.novelai.net");
-
-export function createNovelAISessionClass(
-  argonHashImpl: ArgonHashFn
-): NovelAISessionClass {
-  return class NovelAISessionImpl extends NovelAISession {
-    protected argonHash = argonHashImpl;
-  };
-}
-
-export interface NovelAISessionClass {
-  new (params?: { accessToken?: string }): INovelAISession;
-  login(email: string, password: string): Promise<INovelAISession>;
-}
 
 export interface INovelAISession {
   // new({ accessToken }?: { accessToken?: string }): INovelAISession;
@@ -25,20 +12,18 @@ export interface INovelAISession {
   req(path: string | URL, init?: RequestInit): Promise<Response>;
 }
 
-export abstract class NovelAISession implements INovelAISession {
+export class NovelAISession implements INovelAISession {
   #accessToken: string | null = null;
-  protected abstract argonHash: ArgonHashFn;
 
   constructor({ accessToken }: { accessToken?: string } = {}) {
     this.#accessToken = accessToken ?? null;
   }
 
   public static async login(
-    this: NovelAISessionClass,
     email: string,
     password: string
   ): Promise<INovelAISession> {
-    const session = new this();
+    const session = new NovelAISession();
     await session.login(email, password);
     return session;
   }
@@ -52,6 +37,7 @@ export abstract class NovelAISession implements INovelAISession {
     password: string
   ): Promise<{ accessToken: string | null }> {
     const accessKey = await this.getAccessKey(email, password);
+
     const res = await fetch(endpoint("/user/login"), {
       method: "POST",
       body: JSON.stringify({ key: accessKey }),
@@ -90,7 +76,7 @@ export abstract class NovelAISession implements INovelAISession {
     password: string
   ): Promise<string> {
     return (
-      await this.argonHash(email, password, 64, "novelai_data_access_key")
+      await argonHash(email, password, 64, "novelai_data_access_key")
     ).slice(0, 64);
   }
 }
