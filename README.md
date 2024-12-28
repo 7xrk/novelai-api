@@ -1,4 +1,4 @@
-# novelai-api
+# novelai-api [![JSR](https://jsr.io/badges/@7xrk/novelai-api)](https://jsr.io/@7xrk/novelai-api)
 
 NovelAI API Client for Deno and Node.js
 
