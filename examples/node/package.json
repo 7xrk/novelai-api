@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@7xrk/novelai-api": "npm:@jsr/7xrk__novelai-api@^1.0.2",
+    "outdent": "^0.8.0"
+  }
+}
