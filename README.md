@@ -1,6 +1,6 @@
 # novelai-api
 
-NovelAI API Client for Deno
+NovelAI API Client for Deno and Node.js
 
 ## Example
 
