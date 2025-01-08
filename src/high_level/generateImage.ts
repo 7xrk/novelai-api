@@ -73,7 +73,6 @@ export type GenerateImageArgs = {
       }
     | boolean;
   img2img?: Img2ImgImage;
-  enhanceImg?: Img2ImgImage & { scaleBy: number };
   vibeTransfer?: {
     /** any image type blob */
     image: Blob | Uint8Array;
@@ -117,7 +116,6 @@ export async function generateImage(
     limitToFreeInOpus,
     seed,
     img2img,
-    enhanceImg,
     vibeTransfer,
     vibeTransferMultiple,
     inpainting,
@@ -159,16 +157,11 @@ export async function generateImage(
           keepAspect: true,
         }
       : undefined,
-    enhanceImg,
     limitToFreeInOpus,
   });
 
   if (img2img) {
     img2img.image = await resizeImage(img2img.image, { width, height });
-  }
-
-  if (enhanceImg) {
-    enhanceImg.image = await resizeImage(enhanceImg.image, { width, height });
   }
 
   if (inpainting) {
@@ -246,13 +239,6 @@ export async function generateImage(
           noise: img2img.noise,
           extraNoiseSeed: img2img.noiseSeed ?? seed,
         }
-      : enhanceImg
-      ? {
-          image: (await convertToPng(enhanceImg.image)).buffer,
-          strength: enhanceImg.strength,
-          noise: enhanceImg.noise,
-          extraNoiseSeed: enhanceImg.noiseSeed ?? seed,
-        }
       : {}),
     ...(vibeTransferMultiple
       ? {
@@ -321,12 +307,10 @@ export async function generateImage(
 export function getGenerateResolution({
   sourceImage,
   size: { width, height } = { width: 512, height: 512 },
-  enhanceImg,
   limitToFreeInOpus,
 }: {
   sourceImage?: Size & { keepAspect?: boolean };
   size?: Size;
-  enhanceImg?: Img2ImgImage & { scaleBy: number };
   limitToFreeInOpus?: boolean;
 }): [width: number, height: number] {
   if (sourceImage?.keepAspect) {
@@ -338,11 +322,6 @@ export function getGenerateResolution({
 
     width = Math.round(newSize.width);
     height = Math.round(newSize.height);
-  }
-
-  if (enhanceImg?.scaleBy != null) {
-    width = Math.round(width * enhanceImg.scaleBy);
-    height = Math.round(height * enhanceImg.scaleBy);
   }
 
   if (limitToFreeInOpus) {
