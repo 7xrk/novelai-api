@@ -1,12 +1,13 @@
 import { fit } from "object-fit-math";
 import { loadImage } from "@napi-rs/canvas";
-import { apiAiGenerateImage, nearest64 } from "../endpoints/ai.ts";
+import { apiAiGenerateImage } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import {
   type Size,
   convertToPng,
   resizeImage,
   adjustResolution,
+  nearest64,
   randomInt,
 } from "./utils.ts";
 import { encodeBase64, safeJsonParse } from "../utils.ts";

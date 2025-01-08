@@ -7,7 +7,7 @@ import { encodeBase64, rescue } from "../utils.ts";
 
 /** for resolution value */
 export function nearest64(n: number) {
-  return Math.floor(n / 64) * 64;
+  return Math.ceil(n / 64) * 64;
 }
 
 export async function apiAiGenerateImageSuggestTags(

@@ -54,3 +54,8 @@ export function adjustResolution(
 
   return [Math.round(newWidth), Math.round(newHeight)];
 }
+
+/** for resolution value */
+export function nearest64(n: number) {
+  return Math.ceil(n / 64) * 64;
+}

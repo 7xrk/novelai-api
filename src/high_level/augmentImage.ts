@@ -1,8 +1,13 @@
 import { unzip } from "unzipit";
-import { apiAiAugmentImage, nearest64 } from "../endpoints/ai.ts";
+import { apiAiAugmentImage } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import { safeJsonParse } from "../utils.ts";
-import { type Size, adjustResolution, convertToPng } from "./utils.ts";
+import {
+  type Size,
+  adjustResolution,
+  convertToPng,
+  nearest64,
+} from "./utils.ts";
 import {
   NovelAIAugmentImageRequestTypes,
   type NovelAIImageAugmentEmotionType,
