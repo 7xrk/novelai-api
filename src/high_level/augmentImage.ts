@@ -13,6 +13,16 @@ import {
   type NovelAIImageAugmentEmotionType,
 } from "./consts.ts";
 
+type AugmentImageResponse = {
+  params: Record<string, any>;
+  /** png blob */
+  image: Blob;
+};
+
+type RemoveBGAugmentParam = {
+  reqType: typeof NovelAIAugmentImageRequestTypes.removeBg;
+};
+
 type EmotionAugmentParam = {
   reqType: typeof NovelAIAugmentImageRequestTypes.emotion;
   emotion: NovelAIImageAugmentEmotionType;
@@ -48,12 +58,22 @@ export async function augmentImage(
     image: Blob | Uint8Array;
     limitToFreeInOpus?: boolean;
   } & (
+    | RemoveBGAugmentParam
     | EmotionAugmentParam
     | SketchAugmentParam
     | LineArtAugmentParam
     | ColorizeAugmentParam
   )
-): Promise<{ images: Blob[] }> {
+): Promise<AugmentImageResponse> {
+  if (
+    params.reqType === NovelAIAugmentImageRequestTypes.removeBg &&
+    limitToFreeInOpus
+  ) {
+    throw new Error(
+      "removeBg request type is not supported in opus free generation"
+    );
+  }
+
   let { width, height } = size;
 
   width = nearest64(width);
@@ -82,14 +102,16 @@ export async function augmentImage(
       ? `${emotionPrefix}${params.prompt}`
       : "";
 
-  const res = await apiAiAugmentImage(session, {
+  const reqParams = {
     defry,
     width,
     height,
     image: png.buffer,
     prompt,
     reqType: params.reqType,
-  });
+  };
+
+  const res = await apiAiAugmentImage(session, reqParams);
 
   if (!res.ok) {
     const body = await res.text();
@@ -114,5 +136,8 @@ export async function augmentImage(
     })
   );
 
-  return { images };
+  return {
+    params: reqParams,
+    image: images[0],
+  };
 }

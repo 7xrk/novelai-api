@@ -55,6 +55,7 @@ export type NovelAIImageSamplers =
   (typeof NovelAIImageSamplers)[keyof typeof NovelAIImageSamplers];
 
 export const NovelAIAugmentImageRequestTypes = {
+  removeBg: "bg-removal",
   sketch: "sketch",
   lineArt: "lineart",
   emotion: "emotion",
