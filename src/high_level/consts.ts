@@ -3,7 +3,7 @@ type PresetSize = {
   height: number;
 };
 
-export const NovelAIImageSizePreset: NovelAIImageSizePreset = {
+export const NovelAIImageSizePreset: NovelAIImageSizePreset = /* @__PURE__ */ {
   NORMAL_PORTRAIT: Object.freeze({ width: 832, height: 1216 }),
   NORMAL_LANDSCAPE: Object.freeze({ width: 1216, height: 832 }),
   NORMAL_SQUARE: Object.freeze({ width: 1024, height: 1024 }),
@@ -18,7 +18,7 @@ export const NovelAIImageSizePreset: NovelAIImageSizePreset = {
 };
 Object.freeze(NovelAIImageSizePreset);
 
-export type NovelAIImageSizePreset = {
+export type NovelAIImageSizePreset = /* @__PURE__ */ {
   NORMAL_PORTRAIT: PresetSize;
   NORMAL_LANDSCAPE: PresetSize;
   NORMAL_SQUARE: PresetSize;
@@ -32,7 +32,7 @@ export type NovelAIImageSizePreset = {
   SMALL_SQUARE: PresetSize;
 };
 
-export const NovelAIDiffusionModels = {
+export const NovelAIDiffusionModels = /* @__PURE__ */ {
   NAIDiffusionAnimeV3: "nai-diffusion-3",
   NAIDiffusionAnimeV3Inpainting: "nai-diffusion-3-inpainting",
   NAIDiffusionV4CuratedPreview: "nai-diffusion-4-curated-preview",
@@ -42,7 +42,7 @@ Object.freeze(NovelAIDiffusionModels);
 export type NovelAIDiffusionModels =
   (typeof NovelAIDiffusionModels)[keyof typeof NovelAIDiffusionModels];
 
-export const NovelAIImageSamplers = {
+export const NovelAIImageSamplers = /* @__PURE__ */ {
   Euler: "k_euler",
   EulerAncestral: "k_euler_ancestral",
   DPMpp_2S_Ancestral: "k_dpmpp_2s_ancestral",
@@ -54,7 +54,7 @@ Object.freeze(NovelAIImageSamplers);
 export type NovelAIImageSamplers =
   (typeof NovelAIImageSamplers)[keyof typeof NovelAIImageSamplers];
 
-export const NovelAIAugmentImageRequestTypes = {
+export const NovelAIAugmentImageRequestTypes = /* @__PURE__ */ {
   removeBg: "bg-removal",
   sketch: "sketch",
   lineArt: "lineart",
@@ -66,7 +66,7 @@ Object.freeze(NovelAIAugmentImageRequestTypes);
 export type NovelAIAugmentImageRequestTypes =
   (typeof NovelAIAugmentImageRequestTypes)[keyof typeof NovelAIAugmentImageRequestTypes];
 
-export const NovelAIImageUCPreset = {
+export const NovelAIImageUCPreset = /* @__PURE__ */ {
   Heavy:
     "lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract],",
   Light:
@@ -77,7 +77,7 @@ export const NovelAIImageUCPreset = {
 } as const;
 Object.freeze(NovelAIImageUCPreset);
 
-export const NovelAIImageUCPresetV4CuratedPreview = {
+export const NovelAIImageUCPresetV4CuratedPreview = /* @__PURE__ */ {
   Heavy:
     "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts, ",
   Light:
@@ -86,7 +86,7 @@ export const NovelAIImageUCPresetV4CuratedPreview = {
 } as const;
 Object.freeze(NovelAIImageUCPresetV4CuratedPreview);
 
-export const NovelAIImageAugmentEmotionType = {
+export const NovelAIImageAugmentEmotionType = /* @__PURE__ */ {
   neutral: "neutral",
   happy: "happy",
   sad: "sad",
@@ -117,7 +117,7 @@ Object.freeze(NovelAIImageAugmentEmotionType);
 export type NovelAIImageAugmentEmotionType =
   (typeof NovelAIImageAugmentEmotionType)[keyof typeof NovelAIImageAugmentEmotionType];
 
-export const NovelAIImageUCPresetType = {
+export const NovelAIImageUCPresetType = /* @__PURE__ */ {
   Heavy: "Heavy",
   Light: "Light",
   HumanFocus: "HumanFocus",
@@ -128,12 +128,12 @@ Object.freeze(NovelAIImageUCPresetType);
 export type NovelAIImageUCPresetType =
   (typeof NovelAIImageUCPresetType)[keyof typeof NovelAIImageUCPresetType];
 
-export const NovelAIAImageExtraPresets = {
+export const NovelAIAImageExtraPresets = /* @__PURE__ */ {
   HolidaySprits2024: ",{{{{snowing, holly, christmas tree, christmas}}}}",
 };
 Object.freeze(NovelAIAImageExtraPresets);
 
-export const NovelAIImageExtraPresetType = {
+export const NovelAIImageExtraPresetType = /* @__PURE__ */ {
   HolidaySprits2024: "HolidaySprits2024",
 };
 Object.freeze(NovelAIImageExtraPresetType);
