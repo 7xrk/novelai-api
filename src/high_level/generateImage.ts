@@ -73,15 +73,7 @@ export type GenerateImageArgs = {
       }
     | boolean;
   img2img?: Img2ImgImage;
-  vibeTransfer?: {
-    /** any image type blob */
-    image: Blob | Uint8Array;
-    /** 0 to 1 */
-    informationExtracted?: number;
-    /** 0 to 1 */
-    strength?: number;
-  };
-  vibeTransferMultiple?: {
+  viveTransfer?: {
     image: Blob | Uint8Array;
     /** 0 to 1 */
     informationExtracted?: number;
@@ -116,8 +108,7 @@ export async function generateImage(
     limitToFreeInOpus,
     seed,
     img2img,
-    vibeTransfer,
-    vibeTransferMultiple,
+    viveTransfer,
     inpainting,
   }: GenerateImageArgs
 ): Promise<GenerateImageResponse> {
@@ -240,27 +231,17 @@ export async function generateImage(
           extraNoiseSeed: img2img.noiseSeed ?? seed,
         }
       : {}),
-    ...(vibeTransferMultiple
-      ? {
-          referenceImageMultiple: await Promise.all(
-            vibeTransferMultiple.map(
-              async ({ image }) => (await convertToPng(image)).buffer
-            )
-          ),
-          referenceInformationExtractedMultiple: vibeTransferMultiple.map(
-            (v) => v.informationExtracted
-          ),
-          referenceStrengthMultiple: vibeTransferMultiple.map(
-            (v) => v.strength
-          ),
-        }
-      : vibeTransfer
-      ? {
-          referenceImage: (await convertToPng(vibeTransfer.image)).buffer,
-          referenceInformationExtracted: vibeTransfer.informationExtracted,
-          referenceStrength: vibeTransfer.strength,
-        }
-      : {}),
+    ...(viveTransfer && {
+      referenceImageMultiple: await Promise.all(
+        viveTransfer.map(
+          async ({ image }) => (await convertToPng(image)).buffer
+        )
+      ),
+      referenceInformationExtractedMultiple: viveTransfer.map(
+        (v) => v.informationExtracted
+      ),
+      referenceStrengthMultiple: viveTransfer.map((v) => v.strength),
+    }),
     ...(inpainting
       ? {
           mask: (await convertToPng(inpainting.mask)).buffer,
