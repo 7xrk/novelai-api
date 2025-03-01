@@ -155,12 +155,12 @@ export async function generateImage(
     limitToFreeInOpus,
   });
 
-  if (img2img) {
-    img2img.image = await resizeImage(img2img.image, { width, height });
-  }
+  // if (img2img) {
+  //   img2img.image = await resizeImage(img2img.image, { width, height });
+  // }
 
   if (inpainting) {
-    inpainting.mask = await resizeImage(inpainting.mask, { width, height });
+    // inpainting.mask = await resizeImage(inpainting.mask, { width, height });
 
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
       model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
