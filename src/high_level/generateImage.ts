@@ -162,6 +162,10 @@ export async function generateImage(
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
       model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
     }
+
+    if (isV4Model(model)) {
+      model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+    }
   }
 
   let finalPrompt = prompt;
@@ -240,38 +244,54 @@ export async function generateImage(
     ...v4PreviewOverride,
   });
 
-  const res = await apiAiGenerateImage(session, body);
+  try {
+    const res = await apiAiGenerateImage(session, body);
 
-  if (!res.ok) {
-    const body = await res.text();
-    const json = safeJsonParse(body);
+    if (!res.ok) {
+      const body = await res.text();
+      const json = safeJsonParse(body);
 
-    if (json.ok && json.result?.message) {
-      throw new Error(`Failed to generate image: ${json.result.message}`);
-    } else {
-      throw new Error("Failed to generate image", {
-        cause: new Error(body),
-      });
+      if (json.ok && json.result?.message) {
+        throw new Error(`Failed to generate image: ${json.result.message}`);
+      } else {
+        throw new Error("Failed to generate image", {
+          cause: new Error(body),
+        });
+      }
     }
+
+    const entries = Object.entries(
+      (await unzip(await res.arrayBuffer())).entries
+    );
+
+    const images: Blob[] = [];
+    for (const [, entry] of entries) {
+      images.push(new Blob([await entry.arrayBuffer()], { type: "image/png" }));
+    }
+
+    return {
+      params: {
+        ...body,
+        input_original: prompt,
+        negative_prompt_original: undesiredContent,
+      },
+      files: images,
+    };
+  } catch (e) {
+    throw new ImageGenerationError((e as Error).message, {
+      cause: e,
+      params: body,
+    });
   }
+}
 
-  const entries = Object.entries(
-    (await unzip(await res.arrayBuffer())).entries
-  );
+class ImageGenerationError extends Error {
+  public params: any;
 
-  const images: Blob[] = [];
-  for (const [, entry] of entries) {
-    images.push(new Blob([await entry.arrayBuffer()], { type: "image/png" }));
+  constructor(message: string, options: ErrorOptions & { params?: any } = {}) {
+    super(message, options);
+    this.params = options.params;
   }
-
-  return {
-    params: {
-      ...body,
-      input_original: prompt,
-      negative_prompt_original: undesiredContent,
-    },
-    files: images,
-  };
 }
 
 generateImage.variate = function variateImage(
