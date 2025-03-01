@@ -432,13 +432,10 @@ function getGenerateImageParams(
     },
   };
 
-  if (
-    body.model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
-    body.model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
-    body.model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting
-  ) {
+  if (isV4Model(body.model)) {
     body.parameters.use_coords = true;
     body.parameters.prefer_brownian = true;
+    body.parameters.deliberate_euler_ancestral_bug = false;
 
     const characterPrompts = params.characterPrompts ?? [];
 
