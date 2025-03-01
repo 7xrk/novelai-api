@@ -56,6 +56,17 @@ Object.freeze(NovelAIImageSamplers);
 export type NovelAIImageSamplers =
   (typeof NovelAIImageSamplers)[keyof typeof NovelAIImageSamplers];
 
+export const NovelAINoiseSchedulers = /* @__PURE__ */ {
+  Native: "native",
+  Karras: "karras",
+  Exponential: "exponential",
+  PolyExponential: "polyexponential",
+} as const;
+Object.freeze(NovelAINoiseSchedulers);
+
+export type NovelAINoiseSchedulers =
+  (typeof NovelAINoiseSchedulers)[keyof typeof NovelAINoiseSchedulers];
+
 export const NovelAIAugmentImageRequestTypes = /* @__PURE__ */ {
   removeBg: "bg-removal",
   sketch: "sketch",

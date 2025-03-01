@@ -20,10 +20,11 @@ import {
   NovelAIAImageExtraPresets,
   NovelAIDiffusionModels,
   NovelAIImageUCPresetV4Full,
+  NovelAIImageSamplers,
+  NovelAIImageUCPresetV4CuratedPreview,
+  NovelAIImageUCPresetV3,
+  NovelAINoiseSchedulers,
 } from "./consts.ts";
-import { NovelAIImageSamplers } from "./consts.ts";
-import { NovelAIImageUCPresetV4CuratedPreview } from "./consts.ts";
-import { NovelAIImageUCPresetV3 } from "./consts.ts";
 
 export type GenerateImageResponse = {
   params: Record<string, string | object>;
@@ -66,6 +67,7 @@ export type GenerateImageArgs = {
   nSamples?: number;
   limitToFreeInOpus?: boolean;
   sampler?: NovelAIImageSamplers;
+  noiseSchedule?: NovelAINoiseSchedulers;
   seed?: number;
   guidance?: {
     decrisp?: boolean;
@@ -99,6 +101,7 @@ export async function generateImage(
     ucPreset,
     model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     sampler = NovelAIImageSamplers.Euler,
+    noiseSchedule = NovelAINoiseSchedulers.Native,
     experimental_characterPrompts,
     extraPreset,
     scale = 5,
@@ -209,6 +212,7 @@ export async function generateImage(
     sampler: sampler,
     seed,
     dynamicThresholding: guidance?.decrisp,
+    noiseSchedule,
     // prettier-ignore
     skipCfgAboveSigma:
       typeof guidance?.variety === "number" ? guidance.variety
@@ -354,7 +358,7 @@ type GenerateImageParams = {
   legacy: boolean;
   legacyV3Extend: boolean;
 
-  noiseSchedule: "native";
+  noiseSchedule: NovelAINoiseSchedulers;
   qualityToggle: boolean;
 
   // NC
@@ -419,7 +423,7 @@ function getGenerateImageParams(
       negative_prompt: params.negativePrompt ?? "",
       params_version: 3,
       uncond_scale: params.uncondScale ?? 1,
-      noise_schedule: params.noiseSchedule ?? "native",
+      noise_schedule: params.noiseSchedule ?? NovelAINoiseSchedulers.Native,
       qualityToggle: params.qualityToggle ?? false,
       sampler: params.sampler ?? "k_euler",
       scale: params.scale ?? 5,
@@ -436,6 +440,10 @@ function getGenerateImageParams(
     body.parameters.use_coords = true;
     body.parameters.prefer_brownian = true;
     body.parameters.deliberate_euler_ancestral_bug = false;
+
+    if (body.parameters.noise_schedule === NovelAINoiseSchedulers.Native) {
+      body.parameters.noise_schedule = NovelAINoiseSchedulers.Karras;
+    }
 
     const characterPrompts = params.characterPrompts ?? [];
 
