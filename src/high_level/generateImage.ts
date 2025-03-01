@@ -186,13 +186,12 @@ export async function generateImage(
   }
   seed ??= randomInt();
 
-  const v4PreviewOverride =
-    model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview
-      ? {
-          sm: false,
-          smDyn: false,
-        }
-      : {};
+  const v4PreviewOverride = isV4Model(model)
+    ? {
+        sm: false,
+        smDyn: false,
+      }
+    : {};
 
   const body = getGenerateImageParams({
     input: finalPrompt,
