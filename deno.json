@@ -1,11 +1,8 @@
 {
   "name": "@7xrk/novelai-api",
-  "version": "1.0.6",
+  "version": "1.1.0-rc.1",
   "license": "Unlicense",
   "exports": "./mod.ts",
-  "tasks": {
-    "build:npm": "deno run -A build_npm.ts"
-  },
   "lint": {
     "exclude": ["node_modules", "node", ".pnp.*"],
     "rules": {

@@ -11,3 +11,7 @@ export {
   type UserSubscriptionResponse,
   userSubscription,
 } from "./high_level/userSubscription.ts";
+export {
+  suggestTags,
+  type SuggestTagsResponse,
+} from "./high_level/suggestTags.ts";

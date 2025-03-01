@@ -8,12 +8,14 @@ export {
   enhanceImage,
   userSubscription,
   type UserSubscriptionResponse,
+  suggestTags,
+  type SuggestTagsResponse,
 } from "./src/high_level.ts";
 
 export {
   NovelAIDiffusionModels,
   NovelAIImageSizePreset,
-  NovelAIImageUCPreset,
+  NovelAIImageUCPresetV3,
   NovelAIImageSamplers,
   NovelAIAugmentImageRequestTypes,
   NovelAIImageAugmentEmotionType,

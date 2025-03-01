@@ -3,39 +3,27 @@ import type {
   NovelAIDiffusionModels,
 } from "../high_level/consts.ts";
 import type { INovelAISession } from "../libs/session.ts";
-import { encodeBase64, rescue } from "../utils.ts";
+import { encodeBase64 } from "../utils.ts";
 
 export async function apiAiGenerateImageSuggestTags(
   session: INovelAISession,
   params: {
     model: NovelAIDiffusionModels;
     prompt: string;
+    lang?: "jp" | undefined;
   }
-): Promise<{
-  tags: {
-    tag: string;
-    confidence: number;
-    count: number;
-  }[];
-}> {
+): Promise<Response> {
   const searchParams = new URLSearchParams();
   searchParams.set("model", params.model);
   searchParams.set("prompt", params.prompt);
+  if (params.lang) searchParams.set("lang", params.lang);
 
-  const res = await session.req(
-    `/ai/generate-image/suggest-tags?${searchParams}`,
+  return await session.req(
+    `https://image.novelai.net/ai/generate-image/suggest-tags?${searchParams}`,
     {
       method: "GET",
     }
   );
-
-  if (!res.ok) {
-    const body = await res.text();
-    const json = rescue(() => JSON.parse(body));
-    throw new Error(json.ok ? json.result.message : body);
-  }
-
-  return await res.json();
 }
 
 export async function apiAiGenerateImage(

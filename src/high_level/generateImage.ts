@@ -16,10 +16,14 @@ import type {
   NovelAIImageExtraPresetType,
   NovelAIImageUCPresetType,
 } from "./consts.ts";
-import { NovelAIAImageExtraPresets, NovelAIDiffusionModels } from "./consts.ts";
+import {
+  NovelAIAImageExtraPresets,
+  NovelAIDiffusionModels,
+  NovelAIImageUCPresetV4Full,
+} from "./consts.ts";
 import { NovelAIImageSamplers } from "./consts.ts";
 import { NovelAIImageUCPresetV4CuratedPreview } from "./consts.ts";
-import { NovelAIImageUCPreset } from "./consts.ts";
+import { NovelAIImageUCPresetV3 } from "./consts.ts";
 
 export type GenerateImageResponse = {
   params: Record<string, string | object>;
@@ -114,10 +118,7 @@ export async function generateImage(
 ): Promise<GenerateImageResponse> {
   let { width, height } = size;
 
-  if (
-    model !== NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview &&
-    experimental_characterPrompts
-  ) {
+  if (!isV4Model(model) && experimental_characterPrompts) {
     throw new Error(
       "experimental_characterPrompts is only supported with NAIDiffusionV4CuratedPreview model"
     );
@@ -172,24 +173,12 @@ export async function generateImage(
   }
 
   if (qualityTags) {
-    if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3)
-      finalPrompt +=
-        ", best quality, amazing quality, very aesthetic, absurdres";
-    else if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview)
-      finalPrompt +=
-        ", rating:general, best quality, very aesthetic, absurdres";
+    finalPrompt += getQualityTags(model);
   }
 
   if (ucPreset) {
-    if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
-      if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
-        finalUndesired =
-          NovelAIImageUCPresetV4CuratedPreview[ucPreset] +
-          (finalUndesired ?? "");
-      }
-    } else {
-      finalUndesired = NovelAIImageUCPreset[ucPreset] + (finalUndesired ?? "");
-    }
+    finalUndesired =
+      getUndesiredQualityTags(model, ucPreset) + (finalUndesired ?? "");
   }
   seed ??= randomInt();
 
@@ -284,6 +273,21 @@ export async function generateImage(
     files: images,
   };
 }
+
+generateImage.variate = function variateImage(
+  session: INovelAISession,
+  img: Blob | Uint8Array,
+  params: Omit<GenerateImageArgs, "img2img" | "inpainting">
+): Promise<GenerateImageResponse> {
+  return generateImage(session, {
+    ...params,
+    img2img: {
+      image: img,
+      strength: 0.5,
+      noise: 0.1,
+    },
+  });
+};
 
 export function getGenerateResolution({
   sourceImage,
@@ -409,7 +413,11 @@ function getGenerateImageParams(
     },
   };
 
-  if (body.model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
+  if (
+    body.model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
+    body.model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
+    body.model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting
+  ) {
     body.parameters.use_coords = true;
     body.parameters.prefer_brownian = true;
 
@@ -492,4 +500,39 @@ function getGenerateImageParams(
   }
 
   return body;
+}
+
+function isV4Model(model: NovelAIDiffusionModels) {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting
+  );
+}
+
+function getQualityTags(model: NovelAIDiffusionModels) {
+  if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
+    return ", rating:general, best quality, very aesthetic, absurdres";
+  } else if (isV4Model(model)) {
+    return ", no text, best quality, very aesthetic, absurdres";
+  }
+
+  return ", best quality, amazing quality, very aesthetic, absurdres";
+}
+
+function getUndesiredQualityTags(
+  model: NovelAIDiffusionModels,
+  ucPreset: NovelAIImageUCPresetType
+) {
+  if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
+    if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
+      return NovelAIImageUCPresetV4CuratedPreview[ucPreset];
+    }
+  } else if (isV4Model(model)) {
+    if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
+      return NovelAIImageUCPresetV4Full[ucPreset];
+    }
+  }
+
+  return NovelAIImageUCPresetV3[ucPreset];
 }

@@ -36,6 +36,8 @@ export const NovelAIDiffusionModels = /* @__PURE__ */ {
   NAIDiffusionAnimeV3: "nai-diffusion-3",
   NAIDiffusionAnimeV3Inpainting: "nai-diffusion-3-inpainting",
   NAIDiffusionV4CuratedPreview: "nai-diffusion-4-curated-preview",
+  NAIDiffusionV4Full: "nai-diffusion-4-full",
+  NAIDiffusionV4FullInpainting: "nai-diffusion-4-full-inpainting",
 } as const;
 Object.freeze(NovelAIDiffusionModels);
 
@@ -66,7 +68,7 @@ Object.freeze(NovelAIAugmentImageRequestTypes);
 export type NovelAIAugmentImageRequestTypes =
   (typeof NovelAIAugmentImageRequestTypes)[keyof typeof NovelAIAugmentImageRequestTypes];
 
-export const NovelAIImageUCPreset = /* @__PURE__ */ {
+export const NovelAIImageUCPresetV3 = /* @__PURE__ */ {
   Heavy:
     "lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract],",
   Light:
@@ -75,7 +77,7 @@ export const NovelAIImageUCPreset = /* @__PURE__ */ {
     "nsfw, lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract], bad anatomy, bad hands, @_@, mismatched pupils, heart-shaped pupils, glowing eyes,",
   None: "lowres",
 } as const;
-Object.freeze(NovelAIImageUCPreset);
+Object.freeze(NovelAIImageUCPresetV3);
 
 export const NovelAIImageUCPresetV4CuratedPreview = /* @__PURE__ */ {
   Heavy:
@@ -85,6 +87,15 @@ export const NovelAIImageUCPresetV4CuratedPreview = /* @__PURE__ */ {
   None: "",
 } as const;
 Object.freeze(NovelAIImageUCPresetV4CuratedPreview);
+
+export const NovelAIImageUCPresetV4Full = /* @__PURE__ */ {
+  Heavy:
+    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, multiple views, logo, too many watermarks",
+  Light:
+    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing,",
+  None: "",
+} as const;
+Object.freeze(NovelAIImageUCPresetV4Full);
 
 export const NovelAIImageAugmentEmotionType = /* @__PURE__ */ {
   neutral: "neutral",
@@ -139,4 +150,4 @@ export const NovelAIImageExtraPresetType = /* @__PURE__ */ {
 Object.freeze(NovelAIImageExtraPresetType);
 
 export type NovelAIImageExtraPresetType =
-  (typeof NovelAIImageUCPreset)[keyof typeof NovelAIImageUCPreset];
+  (typeof NovelAIImageUCPresetV3)[keyof typeof NovelAIImageUCPresetV3];
