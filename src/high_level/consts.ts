@@ -90,23 +90,14 @@ export const NovelAIImageUCPresetV3 = /* @__PURE__ */ {
 } as const;
 Object.freeze(NovelAIImageUCPresetV3);
 
-export const NovelAIImageUCPresetV4CuratedPreview = /* @__PURE__ */ {
+export const NovelAIImageUCPresetV4 = /* @__PURE__ */ {
   Heavy:
-    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts, ",
+    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts, white blank page, blank page, ",
   Light:
-    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, logo, dated, signature, ",
+    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, white blank page, blank page, ",
   None: "",
 } as const;
-Object.freeze(NovelAIImageUCPresetV4CuratedPreview);
-
-export const NovelAIImageUCPresetV4Full = /* @__PURE__ */ {
-  Heavy:
-    "blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, multiple views, logo, too many watermarks",
-  Light:
-    "blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing,",
-  None: "",
-} as const;
-Object.freeze(NovelAIImageUCPresetV4Full);
+Object.freeze(NovelAIImageUCPresetV4);
 
 export const NovelAIImageAugmentEmotionType = /* @__PURE__ */ {
   neutral: "neutral",

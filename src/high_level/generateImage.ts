@@ -19,9 +19,8 @@ import type {
 import {
   NovelAIAImageExtraPresets,
   NovelAIDiffusionModels,
-  NovelAIImageUCPresetV4Full,
+  NovelAIImageUCPresetV4,
   NovelAIImageSamplers,
-  NovelAIImageUCPresetV4CuratedPreview,
   NovelAIImageUCPresetV3,
   NovelAINoiseSchedulers,
 } from "./consts.ts";
@@ -548,13 +547,9 @@ function getUndesiredQualityTags(
   model: NovelAIDiffusionModels,
   ucPreset: NovelAIImageUCPresetType
 ) {
-  if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
+  if (isV4Model(model)) {
     if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
-      return NovelAIImageUCPresetV4CuratedPreview[ucPreset];
-    }
-  } else if (isV4Model(model)) {
-    if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
-      return NovelAIImageUCPresetV4Full[ucPreset];
+      return NovelAIImageUCPresetV4[ucPreset];
     }
   }
 
