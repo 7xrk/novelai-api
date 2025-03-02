@@ -1,5 +1,4 @@
 import { fit } from "object-fit-math";
-import { loadImage } from "@napi-rs/canvas";
 import { apiAiGenerateImage } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import {
@@ -8,6 +7,8 @@ import {
   adjustResolution,
   nearest64,
   randomInt,
+  resizeImage,
+  loadImageAsImageData,
 } from "./utils.ts";
 import { encodeBase64, safeJsonParse } from "../utils.ts";
 import { unzip } from "unzipit";
@@ -23,6 +24,8 @@ import {
   NovelAIImageUCPresetV3,
   NovelAINoiseSchedulers,
 } from "./consts.ts";
+import { binarizeImage } from "./utils.ts";
+import { loadImage } from "./utils.ts";
 
 export type GenerateImageResponse = {
   params: Record<string, string | object>;
@@ -172,6 +175,13 @@ export async function generateImage(
 
     if (isV4Model(model)) {
       model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+
+      // NovelAI V4 requires 8-bit binary mask
+      const resized = await resizeImage(inpainting.mask, { width, height });
+      const imgData = await convertToPng(
+        binarizeImage(await loadImageAsImageData(resized), 8)
+      );
+      inpainting.mask = imgData.buffer;
     }
   }
 
