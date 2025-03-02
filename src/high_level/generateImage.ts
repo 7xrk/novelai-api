@@ -5,7 +5,6 @@ import type { INovelAISession } from "../libs/session.ts";
 import {
   type Size,
   convertToPng,
-  resizeImage,
   adjustResolution,
   nearest64,
   randomInt,
@@ -44,10 +43,16 @@ type Img2ImgImage = {
   keepAspect?: boolean;
 };
 
-type CharacterPrompt = {
+export type GenerateImageCharacterCaption = {
   prompt: string;
   center?: { x: number; y: number };
   uc?: string;
+};
+
+export type GenerateImageCharacterPrompts = {
+  useCoords?: boolean;
+  useOrder?: boolean;
+  captions: Array<GenerateImageCharacterCaption>;
 };
 
 export type GenerateImageArgs = {
@@ -56,7 +61,7 @@ export type GenerateImageArgs = {
   promptGuideRescale?: number;
   undesiredContent?: string;
   ucPreset?: NovelAIImageUCPresetType;
-  experimental_characterPrompts?: Array<CharacterPrompt>;
+  characterPrompts?: GenerateImageCharacterPrompts;
   qualityTags?: boolean;
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
   model?: NovelAIDiffusionModels;
@@ -101,7 +106,7 @@ export async function generateImage(
     model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     sampler = NovelAIImageSamplers.Euler,
     noiseSchedule = NovelAINoiseSchedulers.Native,
-    experimental_characterPrompts,
+    characterPrompts,
     extraPreset,
     scale = 5,
     steps = 28,
@@ -120,7 +125,7 @@ export async function generateImage(
 ): Promise<GenerateImageResponse> {
   let { width, height } = size;
 
-  if (!isV4Model(model) && experimental_characterPrompts) {
+  if (!isV4Model(model) && characterPrompts) {
     throw new Error(
       "experimental_characterPrompts is only supported with NAIDiffusionV4CuratedPreview model"
     );
@@ -202,7 +207,7 @@ export async function generateImage(
     width,
     height,
     negativePrompt: finalUndesired,
-    characterPrompts: experimental_characterPrompts ?? [],
+    characterPrompts,
     model,
     scale,
     sm: !!smea,
@@ -346,7 +351,7 @@ type GenerateImageParams = {
   action: "generate" | "img2img" | "infill";
   input: string;
   model: NovelAIDiffusionModels;
-  characterPrompts: Array<CharacterPrompt>;
+  characterPrompts?: GenerateImageCharacterPrompts;
 
   /** Prompt Guidance Rescale */
   cfgRescale: number;
@@ -436,7 +441,7 @@ function getGenerateImageParams(
   };
 
   if (isV4Model(body.model)) {
-    body.parameters.use_coords = true;
+    body.parameters.use_coords = false;
     body.parameters.prefer_brownian = true;
     body.parameters.deliberate_euler_ancestral_bug = false;
 
@@ -444,35 +449,40 @@ function getGenerateImageParams(
       body.parameters.noise_schedule = NovelAINoiseSchedulers.Karras;
     }
 
-    const characterPrompts = params.characterPrompts ?? [];
+    if (params.characterPrompts) {
+      const { useCoords, useOrder } = params.characterPrompts;
+      const characters = params.characterPrompts.captions ?? [];
 
-    body.parameters.characterPrompts = characterPrompts.map((v) => ({
-      prompt: v.prompt,
-      center: v.center ?? { x: 0.5, y: 0.5 },
-      uc: v.uc ?? "",
-    }));
+      body.parameters.use_coords = !!useCoords;
 
-    body.parameters.v4_negative_prompt = {
-      caption: {
-        base_caption: params.negativePrompt ?? "",
-        char_captions: characterPrompts.map((v) => ({
-          char_caption: v.uc ?? "",
-          centers: [v.center ?? { x: 0.5, y: 0.5 }],
-        })),
-      },
-    };
+      body.parameters.characterPrompts = characters.map((v) => ({
+        prompt: v.prompt,
+        center: v.center ?? { x: 0.5, y: 0.5 },
+        uc: v.uc ?? "",
+      }));
 
-    body.parameters.v4_prompt = {
-      caption: {
-        base_caption: params.input ?? "",
-        char_captions: characterPrompts.map((v) => ({
-          char_caption: v.prompt ?? "",
-          centers: [v.center ?? { x: 0.5, y: 0.5 }],
-        })),
-      },
-      use_coords: true,
-      use_order: true,
-    };
+      body.parameters.v4_negative_prompt = {
+        caption: {
+          base_caption: params.negativePrompt ?? "",
+          char_captions: characters.map((v) => ({
+            char_caption: v.uc ?? "",
+            centers: [v.center ?? { x: 0.5, y: 0.5 }],
+          })),
+        },
+      };
+
+      body.parameters.v4_prompt = {
+        caption: {
+          base_caption: params.input ?? "",
+          char_captions: characters.map((v) => ({
+            char_caption: v.prompt ?? "",
+            centers: [v.center ?? { x: 0.5, y: 0.5 }],
+          })),
+        },
+        use_coords: !!useCoords,
+        use_order: !!useOrder,
+      };
+    }
   }
 
   if ("referenceImageMultiple" in params && params.referenceImageMultiple) {

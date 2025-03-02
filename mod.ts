@@ -3,6 +3,8 @@ export {
   augmentImage,
   generateImage,
   getGenerateResolution,
+  type GenerateImageCharacterCaption,
+  type GenerateImageCharacterPrompts,
   type GenerateImageResponse,
   type GenerateImageArgs,
   enhanceImage,
