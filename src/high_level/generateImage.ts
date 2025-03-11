@@ -67,6 +67,7 @@ export type GenerateImageArgs = {
   characterPrompts?: GenerateImageCharacterPrompts;
   qualityTags?: boolean;
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
+  v4LegacyConditioning?: boolean;
   model?: NovelAIDiffusionModels;
   scale?: number;
   steps?: number;
@@ -111,6 +112,7 @@ export async function generateImage(
     noiseSchedule = NovelAINoiseSchedulers.Native,
     characterPrompts,
     extraPreset,
+    v4LegacyConditioning,
     scale = 5,
     steps = 28,
     size = { width: 512, height: 512 },
@@ -222,6 +224,7 @@ export async function generateImage(
     scale,
     sm: !!smea,
     smDyn: typeof smea === "boolean" ? false : !!smea?.dyn,
+    legacyUC: v4LegacyConditioning,
     qualityToggle: !!qualityTags,
     sampler: sampler,
     seed,
@@ -370,6 +373,7 @@ type GenerateImageParams = {
   skipCfgAboveSigma: number | null;
   nSamples: number;
   legacy: boolean;
+  legacyUC: boolean;
   legacyV3Extend: boolean;
 
   noiseSchedule: NovelAINoiseSchedulers;
@@ -432,6 +436,7 @@ function getGenerateImageParams(
       dynamic_thresholding: params.dynamicThresholding ?? true,
       skip_cfg_above_sigma: params.skipCfgAboveSigma ?? null,
       legacy: params.legacy ?? false,
+      legacy_uc: params.legacyUC ?? false,
       legacy_v3_extend: params.legacyV3Extend ?? false,
       n_samples: params.nSamples ?? 1,
       negative_prompt: params.negativePrompt ?? "",
@@ -472,6 +477,7 @@ function getGenerateImageParams(
       }));
 
       body.parameters.v4_negative_prompt = {
+        legacy_uc: !!params.legacyUC,
         caption: {
           base_caption: params.negativePrompt ?? "",
           char_captions: characters.map((v) => ({
