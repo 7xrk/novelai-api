@@ -14,6 +14,7 @@ export {
   type SuggestTagsResponse,
   encodeVibe,
   bundleVibes,
+  type EncodedVibe,
 } from "./src/high_level.ts";
 
 export {
