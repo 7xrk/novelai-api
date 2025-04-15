@@ -104,3 +104,30 @@ export async function apiAiUpscale(
     },
   });
 }
+
+export async function apiAiEncodeVibe(
+  session: INovelAISession,
+  {
+    image,
+    information_extracted,
+    model,
+  }: {
+    image: Uint8Array;
+    information_extracted: number;
+    model: NovelAIDiffusionModels;
+  }
+): Promise<Response> {
+  return await session.req("https://image.novelai.net/ai/encode-vibe", {
+    method: "POST",
+    body: JSON.stringify({
+      image: encodeBase64(image),
+      information_extracted,
+      model,
+    }),
+    headers: {
+      Accept: "*/*",
+      "Accept-Encoding": "gzip, deflate, br, zstd",
+      "Content-Type": "application/json",
+    },
+  });
+}

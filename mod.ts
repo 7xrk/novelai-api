@@ -12,6 +12,8 @@ export {
   type UserSubscriptionResponse,
   suggestTags,
   type SuggestTagsResponse,
+  encodeVibe,
+  bundleVibes,
 } from "./src/high_level.ts";
 
 export {

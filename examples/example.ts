@@ -6,6 +6,7 @@ import {
   generateImage,
   NovelAIImageSizePreset,
   NovelAIImageUCPresetType,
+  encodeVibe,
 } from "../mod.ts";
 
 const env = await load();

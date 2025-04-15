@@ -58,6 +58,19 @@ export type GenerateImageCharacterPrompts = {
   captions: Array<GenerateImageCharacterCaption>;
 };
 
+type V3VibeTransferInput = {
+  image: Blob | Uint8Array;
+  /** 0 to 1 */
+  informationExtracted?: number;
+  /** 0 to 1 */
+  strength?: number;
+};
+
+type V4VibeTransferInput = {
+  encodedVibe: Uint8Array;
+  strength?: number;
+};
+
 export type GenerateImageArgs = {
   prompt: string;
   /** 0 to 1 */
@@ -87,13 +100,7 @@ export type GenerateImageArgs = {
       }
     | boolean;
   img2img?: Img2ImgImage;
-  viveTransfer?: {
-    image: Blob | Uint8Array;
-    /** 0 to 1 */
-    informationExtracted?: number;
-    /** 0 to 1 */
-    strength?: number;
-  }[];
+  viveTransfer?: (V3VibeTransferInput | V4VibeTransferInput)[];
   inpainting?: {
     /** any image type blob, white is inpainting */
     mask: Blob | Uint8Array;
@@ -131,9 +138,25 @@ export async function generateImage(
   let { width, height } = size;
 
   if (!isV4Model(model) && characterPrompts) {
-    throw new Error(
-      "experimental_characterPrompts is only supported with NAIDiffusionV4CuratedPreview model"
-    );
+    throw new Error("characterPrompts is only supported with NovelAI V4 model");
+  }
+
+  if (isV4Model(model) && viveTransfer) {
+    const hasOldVibeInput = viveTransfer.some((v) => "image" in v);
+
+    if (hasOldVibeInput) {
+      throw new Error(
+        "Vive Transfer with Image is not supported with NovelAI V4 model"
+      );
+    }
+  } else if (!isV4Model(model) && viveTransfer) {
+    const hasEncodedVibeInput = viveTransfer.some((v) => "encodedVibe" in v);
+
+    if (hasEncodedVibeInput) {
+      throw new Error(
+        "Vive Transfer with Encoded Vibe is not supported with NovelAI V3 model"
+      );
+    }
   }
 
   let i2iImageSize: Size | undefined;
@@ -246,12 +269,14 @@ export async function generateImage(
       : {}),
     ...(viveTransfer && {
       referenceImageMultiple: await Promise.all(
-        viveTransfer.map(
-          async ({ image }) => (await convertToPng(image)).buffer
+        viveTransfer.map(async (v) =>
+          "image" in v ? (await convertToPng(v.image)).buffer : v.encodedVibe
         )
       ),
-      referenceInformationExtractedMultiple: viveTransfer.map(
-        (v) => v.informationExtracted
+      referenceInformationExtractedMultiple: viveTransfer.map((v) =>
+        isV4Model(model) && "informationExtracted" in v
+          ? v.informationExtracted
+          : undefined
       ),
       referenceStrengthMultiple: viveTransfer.map((v) => v.strength),
     }),
