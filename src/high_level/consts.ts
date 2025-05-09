@@ -36,8 +36,11 @@ export const NovelAIDiffusionModels = /* @__PURE__ */ {
   NAIDiffusionAnimeV3: "nai-diffusion-3",
   NAIDiffusionAnimeV3Inpainting: "nai-diffusion-3-inpainting",
   NAIDiffusionV4CuratedPreview: "nai-diffusion-4-curated-preview",
+  NAIDiffusionV4CuratedInpainting: "nai-diffusion-4-curated-inpainting",
   NAIDiffusionV4Full: "nai-diffusion-4-full",
   NAIDiffusionV4FullInpainting: "nai-diffusion-4-full-inpainting",
+  NAIDiffusionV4_5Curated: "nai-diffusion-4-5-curated",
+  NAIDiffusionV4_5CuratedInpainting: "nai-diffusion-4-5-curated-inpainting",
 } as const;
 Object.freeze(NovelAIDiffusionModels);
 
