@@ -137,7 +137,7 @@ export async function generateImage(
 ): Promise<GenerateImageResponse> {
   let { width, height } = size;
 
-  if (!isV4Model(model) && characterPrompts) {
+  if (!isCharacterPromptsAvailable(model) && characterPrompts) {
     throw new Error("characterPrompts is only supported with NovelAI V4 model");
   }
 
@@ -580,8 +580,14 @@ function isV4Model(model: NovelAIDiffusionModels) {
   return (
     model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
     model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
-    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting
+    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting
   );
+}
+
+function isCharacterPromptsAvailable(model: NovelAIDiffusionModels): boolean {
+  return isV4Model(model);
 }
 
 function getQualityTags(model: NovelAIDiffusionModels) {
