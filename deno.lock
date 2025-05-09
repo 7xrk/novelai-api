@@ -1,12 +1,12 @@
 {
-  "version": "4",
+  "version": "5",
   "specifiers": {
     "jsr:@denosaurs/argontwo@0.2": "0.2.0",
     "jsr:@denosaurs/lz4@0.1.4": "0.1.4",
     "jsr:@rabbit-company/blake2b@^2.1.1": "2.1.1",
     "jsr:@std/encoding@0.221": "0.221.0",
     "jsr:@std/encoding@^1.0.6": "1.0.6",
-    "npm:@napi-rs/canvas@~0.1.64": "0.1.64",
+    "npm:@napi-rs/canvas@~0.1.70": "0.1.70",
     "npm:@types/node@*": "22.5.4",
     "npm:object-fit-math@1": "1.0.0",
     "npm:unzipit@*": "1.4.3",
@@ -35,48 +35,118 @@
   },
   "npm": {
     "@napi-rs/canvas-android-arm64@0.1.64": {
-      "integrity": "sha512-kyS1b0lt3Nj6QDci8mHTjLA782OpUz5+yiDzsXeOOdqPgiKuDX6ff228gJcZ5/vEOf40rvxar9cYArsTeSuhqQ=="
+      "integrity": "sha512-kyS1b0lt3Nj6QDci8mHTjLA782OpUz5+yiDzsXeOOdqPgiKuDX6ff228gJcZ5/vEOf40rvxar9cYArsTeSuhqQ==",
+      "os": ["android"],
+      "cpu": ["arm64"]
+    },
+    "@napi-rs/canvas-android-arm64@0.1.70": {
+      "integrity": "sha512-I/YOuQ0wbkVYxVaYtCgN42WKTYxNqFA0gTcTrHIGG1jfpDSyZWII/uHcjOo4nzd19io6Y4+/BqP8E5hJgf9OmQ==",
+      "os": ["android"],
+      "cpu": ["arm64"]
     },
     "@napi-rs/canvas-darwin-arm64@0.1.64": {
-      "integrity": "sha512-FiXkDoQcTaKWU5ZavEpyYTB+gwLtML/KMnYBi/t5gQGbEC5sOM16S4UtQNAb5zraam0/75wqFyVbgIt3H5JbWg=="
+      "integrity": "sha512-FiXkDoQcTaKWU5ZavEpyYTB+gwLtML/KMnYBi/t5gQGbEC5sOM16S4UtQNAb5zraam0/75wqFyVbgIt3H5JbWg==",
+      "os": ["darwin"],
+      "cpu": ["arm64"]
+    },
+    "@napi-rs/canvas-darwin-arm64@0.1.70": {
+      "integrity": "sha512-4pPGyXetHIHkw2TOJHujt3mkCP8LdDu8+CT15ld9Id39c752RcI0amDHSuMLMQfAjvusA9B5kKxazwjMGjEJpQ==",
+      "os": ["darwin"],
+      "cpu": ["arm64"]
     },
     "@napi-rs/canvas-darwin-x64@0.1.64": {
-      "integrity": "sha512-TobMkHfS93VBdZclq7V82tnbYT7+swKe4rhuRtIAi+HolIPhKkoZP6mUthl841Sfsuo0f2o6ZJxn+Y6DWmZ3Tg=="
+      "integrity": "sha512-TobMkHfS93VBdZclq7V82tnbYT7+swKe4rhuRtIAi+HolIPhKkoZP6mUthl841Sfsuo0f2o6ZJxn+Y6DWmZ3Tg==",
+      "os": ["darwin"],
+      "cpu": ["x64"]
+    },
+    "@napi-rs/canvas-darwin-x64@0.1.70": {
+      "integrity": "sha512-+2N6Os9LbkmDMHL+raknrUcLQhsXzc5CSXRbXws9C3pv/mjHRVszQ9dhFUUe9FjfPhCJznO6USVdwOtu7pOrzQ==",
+      "os": ["darwin"],
+      "cpu": ["x64"]
     },
     "@napi-rs/canvas-linux-arm-gnueabihf@0.1.64": {
-      "integrity": "sha512-Zs4+wQpLMjsIvC1sC0+HeYsMGrNtqkhgEMdIHEA5yWLaGmLlsiiqJ+ZZKasynHLklWFfV6ywkfhPTLs2n80tlQ=="
+      "integrity": "sha512-Zs4+wQpLMjsIvC1sC0+HeYsMGrNtqkhgEMdIHEA5yWLaGmLlsiiqJ+ZZKasynHLklWFfV6ywkfhPTLs2n80tlQ==",
+      "os": ["linux"],
+      "cpu": ["arm"]
+    },
+    "@napi-rs/canvas-linux-arm-gnueabihf@0.1.70": {
+      "integrity": "sha512-QjscX9OaKq/990sVhSMj581xuqLgiaPVMjjYvWaCmAJRkNQ004QfoSMEm3FoTqM4DRoquP8jvuEXScVJsc1rqQ==",
+      "os": ["linux"],
+      "cpu": ["arm"]
     },
     "@napi-rs/canvas-linux-arm64-gnu@0.1.64": {
-      "integrity": "sha512-AaE2LU42iASw5PE8UdJ/GxAHfN2nKvnwgDL9rR+JzsN19fl4Av8R2VlnBBKVKGJekeqlAN+J+9oIFIGvKUpkpA=="
+      "integrity": "sha512-AaE2LU42iASw5PE8UdJ/GxAHfN2nKvnwgDL9rR+JzsN19fl4Av8R2VlnBBKVKGJekeqlAN+J+9oIFIGvKUpkpA==",
+      "os": ["linux"],
+      "cpu": ["arm64"]
+    },
+    "@napi-rs/canvas-linux-arm64-gnu@0.1.70": {
+      "integrity": "sha512-LNakMOwwqwiHIwMpnMAbFRczQMQ7TkkMyATqFCOtUJNlE6LPP/QiUj/mlFrNbUn/hctqShJ60gWEb52ZTALbVw==",
+      "os": ["linux"],
+      "cpu": ["arm64"]
     },
     "@napi-rs/canvas-linux-arm64-musl@0.1.64": {
-      "integrity": "sha512-EcScvyDfBaP44pfrRxDAmv/NKo7CAM34a5HVo6xSPAlLhLaOWTcMJrlZc14Sx105Q46u2myH1DcTtVsFO9XRfg=="
+      "integrity": "sha512-EcScvyDfBaP44pfrRxDAmv/NKo7CAM34a5HVo6xSPAlLhLaOWTcMJrlZc14Sx105Q46u2myH1DcTtVsFO9XRfg==",
+      "os": ["linux"],
+      "cpu": ["arm64"]
+    },
+    "@napi-rs/canvas-linux-arm64-musl@0.1.70": {
+      "integrity": "sha512-wBTOllEYNfJCHOdZj9v8gLzZ4oY3oyPX8MSRvaxPm/s7RfEXxCyZ8OhJ5xAyicsDdbE5YBZqdmaaeP5+xKxvtg==",
+      "os": ["linux"],
+      "cpu": ["arm64"]
     },
     "@napi-rs/canvas-linux-riscv64-gnu@0.1.64": {
-      "integrity": "sha512-XlqIGfNxV3JF4+mzn+BVxCsKeYGHhYnHo5m8COn012iEri0UXU65VSgMVbAa+78neu9bXoBWT0fUI2TrnV+u1Q=="
+      "integrity": "sha512-XlqIGfNxV3JF4+mzn+BVxCsKeYGHhYnHo5m8COn012iEri0UXU65VSgMVbAa+78neu9bXoBWT0fUI2TrnV+u1Q==",
+      "os": ["linux"],
+      "cpu": ["riscv64"]
+    },
+    "@napi-rs/canvas-linux-riscv64-gnu@0.1.70": {
+      "integrity": "sha512-GVUUPC8TuuFqHip0rxHkUqArQnlzmlXmTEBuXAWdgCv85zTCFH8nOHk/YCF5yo0Z2eOm8nOi90aWs0leJ4OE5Q==",
+      "os": ["linux"],
+      "cpu": ["riscv64"]
     },
     "@napi-rs/canvas-linux-x64-gnu@0.1.64": {
-      "integrity": "sha512-TuVeg6ISOV/NmAYE7Gg5/lyE/SW3a2Unrd+3kTVcI76LHfZwZcdPaNaU9GKJLLv1O5/zMcgK/lJmYOpI+JU4NQ=="
+      "integrity": "sha512-TuVeg6ISOV/NmAYE7Gg5/lyE/SW3a2Unrd+3kTVcI76LHfZwZcdPaNaU9GKJLLv1O5/zMcgK/lJmYOpI+JU4NQ==",
+      "os": ["linux"],
+      "cpu": ["x64"]
+    },
+    "@napi-rs/canvas-linux-x64-gnu@0.1.70": {
+      "integrity": "sha512-/kvUa2lZRwGNyfznSn5t1ShWJnr/m5acSlhTV3eXECafObjl0VBuA1HJw0QrilLpb4Fe0VLywkpD1NsMoVDROQ==",
+      "os": ["linux"],
+      "cpu": ["x64"]
     },
     "@napi-rs/canvas-linux-x64-musl@0.1.64": {
-      "integrity": "sha512-JwfHdmSIRPlP+u8xglfxcqYfpjg6k/HROBKjeA5eSNCHUiSdH/HStyieAkMInyNjbqVL0FwTgLLNWW16fqTq8w=="
+      "integrity": "sha512-JwfHdmSIRPlP+u8xglfxcqYfpjg6k/HROBKjeA5eSNCHUiSdH/HStyieAkMInyNjbqVL0FwTgLLNWW16fqTq8w==",
+      "os": ["linux"],
+      "cpu": ["x64"]
+    },
+    "@napi-rs/canvas-linux-x64-musl@0.1.70": {
+      "integrity": "sha512-aqlv8MLpycoMKRmds7JWCfVwNf1fiZxaU7JwJs9/ExjTD8lX2KjsO7CTeAj5Cl4aEuzxUWbJPUUE2Qu9cZ1vfg==",
+      "os": ["linux"],
+      "cpu": ["x64"]
     },
     "@napi-rs/canvas-win32-x64-msvc@0.1.64": {
-      "integrity": "sha512-iVrrc+Ob9yNJ6yPeMRympLOszg2JvV6DaSostBbAs714eaQ/+i5b6dTI0QRdb/JWpm95CQ7SM/kOPZJZv7Rfjw=="
+      "integrity": "sha512-iVrrc+Ob9yNJ6yPeMRympLOszg2JvV6DaSostBbAs714eaQ/+i5b6dTI0QRdb/JWpm95CQ7SM/kOPZJZv7Rfjw==",
+      "os": ["win32"],
+      "cpu": ["x64"]
     },
-    "@napi-rs/canvas@0.1.64": {
-      "integrity": "sha512-GjvaYebjPsnvGxBsUJxW2Bh1Di9kVifWZ+LLeQEI7se4SD5Ts7GRpdLXhKM05wA4GB9reClFLRd4lUoFMcTMxw==",
-      "dependencies": [
-        "@napi-rs/canvas-android-arm64",
-        "@napi-rs/canvas-darwin-arm64",
-        "@napi-rs/canvas-darwin-x64",
-        "@napi-rs/canvas-linux-arm-gnueabihf",
-        "@napi-rs/canvas-linux-arm64-gnu",
-        "@napi-rs/canvas-linux-arm64-musl",
-        "@napi-rs/canvas-linux-riscv64-gnu",
-        "@napi-rs/canvas-linux-x64-gnu",
-        "@napi-rs/canvas-linux-x64-musl",
-        "@napi-rs/canvas-win32-x64-msvc"
+    "@napi-rs/canvas-win32-x64-msvc@0.1.70": {
+      "integrity": "sha512-Q9QU3WIpwBTVHk4cPfBjGHGU4U0llQYRXgJtFtYqqGNEOKVN4OT6PQ+ve63xwIPODMpZ0HHyj/KLGc9CWc3EtQ==",
+      "os": ["win32"],
+      "cpu": ["x64"]
+    },
+    "@napi-rs/canvas@0.1.70": {
+      "integrity": "sha512-nD6NGa4JbNYSZYsTnLGrqe9Kn/lCkA4ybXt8sx5ojDqZjr2i0TWAHxx/vhgfjX+i3hCdKWufxYwi7CfXqtITSA==",
+      "optionalDependencies": [
+        "@napi-rs/canvas-android-arm64@0.1.70",
+        "@napi-rs/canvas-darwin-arm64@0.1.70",
+        "@napi-rs/canvas-darwin-x64@0.1.70",
+        "@napi-rs/canvas-linux-arm-gnueabihf@0.1.70",
+        "@napi-rs/canvas-linux-arm64-gnu@0.1.70",
+        "@napi-rs/canvas-linux-arm64-musl@0.1.70",
+        "@napi-rs/canvas-linux-riscv64-gnu@0.1.70",
+        "@napi-rs/canvas-linux-x64-gnu@0.1.70",
+        "@napi-rs/canvas-linux-x64-musl@0.1.70",
+        "@napi-rs/canvas-win32-x64-msvc@0.1.70"
       ]
     },
     "@types/node@22.5.4": {
@@ -141,7 +211,7 @@
       "jsr:@denosaurs/argontwo@0.2",
       "jsr:@rabbit-company/blake2b@^2.1.1",
       "jsr:@std/encoding@^1.0.6",
-      "npm:@napi-rs/canvas@~0.1.64",
+      "npm:@napi-rs/canvas@~0.1.70",
       "npm:object-fit-math@1",
       "npm:unzipit@^1.4.3"
     ]
