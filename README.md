@@ -15,7 +15,7 @@ const session = await NovelAISession.login("email", "password");
 // Text to Image
 const result = await generateImage(session, {
   limitToFreeInOpus: true,
-  model: NovelAIDiffusionModels.NAIDiffusionAnimeV3,
+  model: NovelAIDiffusionModels.NAIDiffusionV4_5Curated,
   size: NovelAIImageSizePreset.NORMAL_LANDSCAPE,
   prompt: "A beautiful sunset over the ocean",
   undesiredContent: "very displeasing",
@@ -27,7 +27,7 @@ const result = await generateImage(session, {
 // Image to Image
 const result = await generateImage(session, {
   limitToFreeInOpus: true,
-  model: NovelAIDiffusionModels.NAIDiffusionAnimeV3,
+  model: NovelAIDiffusionModels.NAIDiffusionV4_5Curated,
   size: NovelAIImageSizePreset.NORMAL_LANDSCAPE,
   prompt: "A beautiful sunset over the ocean",
   undesiredContent: "very displeasing",

@@ -141,7 +141,7 @@ export async function generateImage(
     throw new Error("characterPrompts is only supported with NovelAI V4 model");
   }
 
-  if (isV4Model(model) && viveTransfer) {
+  if (isV4XModel(model) && viveTransfer) {
     const hasOldVibeInput = viveTransfer.some((v) => "image" in v);
 
     if (hasOldVibeInput) {
@@ -149,7 +149,7 @@ export async function generateImage(
         "Vive Transfer with Image is not supported with NovelAI V4 model"
       );
     }
-  } else if (!isV4Model(model) && viveTransfer) {
+  } else if (!isV4XModel(model) && viveTransfer) {
     const hasEncodedVibeInput = viveTransfer.some((v) => "encodedVibe" in v);
 
     if (hasEncodedVibeInput) {
@@ -192,14 +192,20 @@ export async function generateImage(
   // }
 
   if (inpainting) {
-    // inpainting.mask = await resizeImage(inpainting.mask, { width, height });
-
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
       model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
-    }
-
-    if (isV4Model(model)) {
-      model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+    } else if (isV4XModel(model)) {
+      switch (model) {
+        case NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview:
+          model = NovelAIDiffusionModels.NAIDiffusionV4CuratedInpainting;
+          break;
+        case NovelAIDiffusionModels.NAIDiffusionV4Full:
+          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+          break;
+        case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
+          model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
+          break;
+      }
 
       // NovelAI V4 requires 8-bit binary mask
       const resized = await resizeImage(inpainting.mask, { width, height });
@@ -228,7 +234,7 @@ export async function generateImage(
   }
   seed ??= randomInt();
 
-  const v4PreviewOverride = isV4Model(model)
+  const v4PreviewOverride = isV4XModel(model)
     ? {
         sm: false,
         smDyn: false,
@@ -274,7 +280,7 @@ export async function generateImage(
         )
       ),
       referenceInformationExtractedMultiple: viveTransfer.map((v) =>
-        isV4Model(model) && "informationExtracted" in v
+        isV4XModel(model) && "informationExtracted" in v
           ? v.informationExtracted
           : undefined
       ),
@@ -480,7 +486,7 @@ function getGenerateImageParams(
     },
   };
 
-  if (isV4Model(body.model)) {
+  if (isV4XModel(body.model)) {
     body.parameters.use_coords = false;
     body.parameters.prefer_brownian = true;
     body.parameters.deliberate_euler_ancestral_bug = false;
@@ -576,7 +582,7 @@ function getGenerateImageParams(
   return body;
 }
 
-function isV4Model(model: NovelAIDiffusionModels) {
+function isV4XModel(model: NovelAIDiffusionModels) {
   return (
     model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
     model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
@@ -587,13 +593,13 @@ function isV4Model(model: NovelAIDiffusionModels) {
 }
 
 function isCharacterPromptsAvailable(model: NovelAIDiffusionModels): boolean {
-  return isV4Model(model);
+  return isV4XModel(model);
 }
 
 function getQualityTags(model: NovelAIDiffusionModels) {
   if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
     return ", rating:general, best quality, very aesthetic, absurdres";
-  } else if (isV4Model(model)) {
+  } else if (isV4XModel(model)) {
     return ", no text, best quality, very aesthetic, absurdres";
   }
 
@@ -604,7 +610,7 @@ function getUndesiredQualityTags(
   model: NovelAIDiffusionModels,
   ucPreset: NovelAIImageUCPresetType
 ) {
-  if (isV4Model(model)) {
+  if (isV4XModel(model)) {
     if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
       return NovelAIImageUCPresetV4[ucPreset];
     }
