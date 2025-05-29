@@ -187,9 +187,9 @@ export async function generateImage(
     limitToFreeInOpus,
   });
 
-  // if (img2img) {
-  //   img2img.image = await resizeImage(img2img.image, { width, height });
-  // }
+  if (img2img) {
+    img2img.image = await resizeImage(img2img.image, { width, height });
+  }
 
   if (inpainting) {
     if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
@@ -207,7 +207,7 @@ export async function generateImage(
           break;
       }
 
-      // NovelAI V4 requires 8-bit binary mask
+      // NovelAI V4 requires 8px binary mask
       const resized = await resizeImage(inpainting.mask, { width, height });
       const imgData = await convertToPng(
         binarizeImage(await loadImageAsImageData(resized), 8)

@@ -1,6 +1,6 @@
 {
   "name": "@7xrk/novelai-api",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "license": "Unlicense",
   "exports": "./mod.ts",
   "lint": {
@@ -30,5 +30,9 @@
       "*.lock",
       "*.json"
     ]
-  }
+  },
+  "compilerOptions": {
+    "lib": ["DOM", "ES2023"]
+  },
+  "unstable": ["sloppy-imports"]
 }

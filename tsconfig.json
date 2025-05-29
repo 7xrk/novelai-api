@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "lib": ["DOM", "ES2023"],
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*.ts", "mod.ts", "mod_node.ts"],
-  "exclude": ["npm/"]
-}
