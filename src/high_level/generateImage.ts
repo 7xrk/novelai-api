@@ -495,11 +495,32 @@ function getGenerateImageParams(
       body.parameters.noise_schedule = NovelAINoiseSchedulers.Karras;
     }
 
+    // v4_prompt and v4_negative_prompt is required for V4 models
+    // if missing it will result in an internal server error
+    body.parameters.v4_negative_prompt = {
+      legacy_uc: !!params.legacyUC,
+      caption: {
+        base_caption: params.negativePrompt ?? "",
+        char_captions: [],
+      },
+    };
+
+    body.parameters.v4_prompt = {
+      caption: {
+        base_caption: params.input ?? "",
+        char_captions: [],
+      },
+      use_coords: false,
+      use_order: false,
+    };
+
     if (params.characterPrompts) {
       const { useCoords, useOrder } = params.characterPrompts;
       const characters = params.characterPrompts.captions ?? [];
 
       body.parameters.use_coords = !!useCoords;
+      body.parameters.v4_prompt.use_coords = !!useCoords;
+      body.parameters.v4_prompt.use_order = !!useOrder;
 
       body.parameters.characterPrompts = characters.map((v) => ({
         prompt: v.prompt,
@@ -507,28 +528,17 @@ function getGenerateImageParams(
         uc: v.uc ?? "",
       }));
 
-      body.parameters.v4_negative_prompt = {
-        legacy_uc: !!params.legacyUC,
-        caption: {
-          base_caption: params.negativePrompt ?? "",
-          char_captions: characters.map((v) => ({
-            char_caption: v.uc ?? "",
-            centers: [v.center ?? { x: 0.5, y: 0.5 }],
-          })),
-        },
-      };
+      body.parameters.v4_negative_prompt.caption.char_captions = characters.map(
+        (v) => ({
+          char_caption: v.uc ?? "",
+          centers: [v.center ?? { x: 0.5, y: 0.5 }],
+        })
+      );
 
-      body.parameters.v4_prompt = {
-        caption: {
-          base_caption: params.input ?? "",
-          char_captions: characters.map((v) => ({
-            char_caption: v.prompt ?? "",
-            centers: [v.center ?? { x: 0.5, y: 0.5 }],
-          })),
-        },
-        use_coords: !!useCoords,
-        use_order: !!useOrder,
-      };
+      body.parameters.v4_prompt.caption.char_captions = characters.map((v) => ({
+        char_caption: v.prompt ?? "",
+        centers: [v.center ?? { x: 0.5, y: 0.5 }],
+      }));
     }
   }
 

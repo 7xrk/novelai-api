@@ -21,7 +21,7 @@ const result = await generateImage(session, {
   prompt: outdent`1girl,{{{best quality, amazing quality, very aesthetic}}}`,
   undesiredContent: outdent`worst quality`,
   ucPreset: NovelAIImageUCPresetType.Heavy,
-  model: NovelAIDiffusionModels.NAIDiffusionAnimeV3,
+  model: NovelAIDiffusionModels.NAIDiffusionV4Full,
   size: NovelAIImageSizePreset.NORMAL_LANDSCAPE,
   smea: { dyn: true },
   // img2img: {

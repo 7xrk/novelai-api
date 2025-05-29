@@ -20,7 +20,7 @@ const result = await generateImage(session, {
   prompt: "A beautiful sunset over the ocean",
   undesiredContent: "very displeasing",
   ucPreset: NovelAIImageUCPresetType.Heavy,
-  smea: { dyn: true },
+  smea: { dyn: true }, // SMEA ignored if unsupported by the model
   nSamples: 1,
 });
 
@@ -32,7 +32,7 @@ const result = await generateImage(session, {
   prompt: "A beautiful sunset over the ocean",
   undesiredContent: "very displeasing",
   ucPreset: NovelAIImageUCPresetType.Heavy,
-  smea: { dyn: true },
+  smea: { dyn: true }, // SMEA ignored if unsupported by the model
   nSamples: 1,
   img2img: {
     image: Deno.readFileSync("input.jpg"),
