@@ -18,15 +18,20 @@ mkdir("./tmp", { recursive: true });
 console.log("generating");
 const result = await generateImage(session, {
   limitToFreeInOpus: true,
-  prompt: outdent`1girl,{{{best quality, amazing quality, very aesthetic}}}`,
+  prompt: outdent`2girls`,
+  characterPrompts: {
+    useCoords: false,
+    useOrder: false,
+    captions: [{ prompt: "girl, red hair" }, { prompt: "girl, blue hair" }],
+  },
   undesiredContent: outdent`worst quality`,
   ucPreset: NovelAIImageUCPresetType.Heavy,
-  model: NovelAIDiffusionModels.NAIDiffusionAnimeV3,
+  model: NovelAIDiffusionModels.NAIDiffusionV4_5Full,
   size: NovelAIImageSizePreset.NORMAL_LANDSCAPE,
   smea: { dyn: true },
   // img2img: {
   //   keepAspect: true,
-  //   image: await readFile("./test.jpeg"),
+  //   image: Deno.readFileSync("./tmp/test.png"),
   //   strength: 0.8,
   // },
 });

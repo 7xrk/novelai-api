@@ -12,17 +12,15 @@ import {
 } from "./utils.ts";
 import { encodeBase64, safeJsonParse } from "../utils.ts";
 import { unzip } from "unzipit";
-import type {
-  NovelAIImageExtraPresetType,
-  NovelAIImageUCPresetType,
-} from "./consts.ts";
 import {
+  type NovelAIImageExtraPresetType,
+  type NovelAIImageUCPresetType,
   NovelAIAImageExtraPresets,
   NovelAIDiffusionModels,
-  NovelAIImageUCPresetV4,
   NovelAIImageSamplers,
-  NovelAIImageUCPresetV3,
   NovelAINoiseSchedulers,
+  NovelAIImageQualityPresets,
+  NovelAIImageUCPresets,
 } from "./consts.ts";
 import { binarizeImage } from "./utils.ts";
 import { loadImage } from "./utils.ts";
@@ -236,9 +234,10 @@ export async function generateImage(
     finalUndesired =
       getUndesiredQualityTags(model, ucPreset) + (finalUndesired ?? "");
   }
+
   seed ??= randomInt();
 
-  const v4PreviewOverride = isV4XModel(model)
+  const disableSmeaOverride = isV4XModel(model)
     ? {
         sm: false,
         smDyn: false,
@@ -306,7 +305,7 @@ export async function generateImage(
           addOriginalImage: inpainting.overlayOriginalImage,
         }
       : {}),
-    ...v4PreviewOverride,
+    ...disableSmeaOverride,
   });
 
   try {
@@ -628,10 +627,8 @@ function isCharacterPromptsAvailable(model: NovelAIDiffusionModels): boolean {
 }
 
 function getQualityTags(model: NovelAIDiffusionModels) {
-  if (model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview) {
-    return ", rating:general, best quality, very aesthetic, absurdres";
-  } else if (isV4XModel(model)) {
-    return ", no text, best quality, very aesthetic, absurdres";
+  if (NovelAIImageQualityPresets[model]) {
+    return NovelAIImageQualityPresets[model];
   }
 
   return ", best quality, amazing quality, very aesthetic, absurdres";
@@ -641,11 +638,12 @@ function getUndesiredQualityTags(
   model: NovelAIDiffusionModels,
   ucPreset: NovelAIImageUCPresetType
 ) {
-  if (isV4XModel(model)) {
-    if (ucPreset === "Heavy" || ucPreset === "Light" || ucPreset === "None") {
-      return NovelAIImageUCPresetV4[ucPreset];
-    }
-  }
+  const modelPresets = NovelAIImageUCPresets[model] as any;
 
-  return NovelAIImageUCPresetV3[ucPreset];
+  if (!modelPresets[ucPreset]) {
+    console.info(
+      `Undesired quality tag "${ucPreset}" not found for model "${model}".`
+    );
+  }
+  return modelPresets[ucPreset] ?? "";
 }

@@ -20,7 +20,10 @@ export {
 export {
   NovelAIDiffusionModels,
   NovelAIImageSizePreset,
-  NovelAIImageUCPresetV3,
+  NovelAIImageUCPresets,
+  NovelAIImageQualityPresets,
+  NovelAINoiseSchedulers,
+  NovelAIAImageExtraPresets,
   NovelAIImageSamplers,
   NovelAIAugmentImageRequestTypes,
   NovelAIImageAugmentEmotionType,
