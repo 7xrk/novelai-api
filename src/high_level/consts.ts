@@ -41,6 +41,7 @@ export const NovelAIDiffusionModels = /* @__PURE__ */ {
   NAIDiffusionV4FullInpainting: "nai-diffusion-4-full-inpainting",
   NAIDiffusionV4_5Curated: "nai-diffusion-4-5-curated",
   NAIDiffusionV4_5CuratedInpainting: "nai-diffusion-4-5-curated-inpainting",
+  NAIDiffusionV4_5Full: "nai-diffusion-4-5-full",
 } as const;
 Object.freeze(NovelAIDiffusionModels);
 

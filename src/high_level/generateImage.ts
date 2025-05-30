@@ -205,6 +205,10 @@ export async function generateImage(
         case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
           model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
           break;
+        case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
+          // TODO: Update to v4.5 inpainting model when available
+          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+          break;
       }
 
       // NovelAI V4 requires 8px binary mask
@@ -212,7 +216,7 @@ export async function generateImage(
       const imgData = await convertToPng(
         binarizeImage(await loadImageAsImageData(resized), 8)
       );
-      inpainting.mask = imgData.buffer;
+      inpainting.mask = new Uint8Array(imgData.buffer);
     }
   }
 
@@ -240,6 +244,14 @@ export async function generateImage(
         smDyn: false,
       }
     : {};
+
+  if (!isViveTransferAvailable(model) && viveTransfer) {
+    console.info(
+      `Vive Transfer is not available for model ${model}. Skip to attach reference images.`
+    );
+
+    viveTransfer = undefined;
+  }
 
   const body = getGenerateImageParams({
     input: finalPrompt,
@@ -276,7 +288,9 @@ export async function generateImage(
     ...(viveTransfer && {
       referenceImageMultiple: await Promise.all(
         viveTransfer.map(async (v) =>
-          "image" in v ? (await convertToPng(v.image)).buffer : v.encodedVibe
+          "image" in v
+            ? new Uint8Array((await convertToPng(v.image)).buffer)
+            : v.encodedVibe
         )
       ),
       referenceInformationExtractedMultiple: viveTransfer.map((v) =>
@@ -429,12 +443,7 @@ type GenerateImageParams = {
   referenceStrengthMultiple: (number | null | undefined)[];
 };
 
-type Text2ImageParams = GenerateImageParams & {
-  // References
-  referenceImage?: Uint8Array | null;
-  referenceInformationExtracted?: number;
-  referenceStrength?: number;
-};
+type Text2ImageParams = GenerateImageParams;
 
 type Image2ImageParams = GenerateImageParams & {
   /** Binary of png image */
@@ -543,35 +552,36 @@ function getGenerateImageParams(
   }
 
   if ("referenceImageMultiple" in params && params.referenceImageMultiple) {
-    if (
-      params.referenceImageMultiple.length !==
-        params.referenceInformationExtractedMultiple?.length ||
-      params.referenceImageMultiple.length !==
-        params.referenceStrengthMultiple?.length
-    ) {
-      throw new Error(
-        "referenceImageMultiple, referenceInformationExtractedMultiple, and referenceStrengthMultiple must have the same length"
+    if (!isViveTransferAvailable(params.model!)) {
+      console.info(
+        `Vive Transfer is not available for model ${params.model}. Skip to attach reference images.`
+      );
+    } else {
+      if (
+        params.referenceImageMultiple.length !==
+          params.referenceInformationExtractedMultiple?.length ||
+        params.referenceImageMultiple.length !==
+          params.referenceStrengthMultiple?.length
+      ) {
+        throw new Error(
+          "referenceImageMultiple, referenceInformationExtractedMultiple, and referenceStrengthMultiple must have the same length"
+        );
+      }
+
+      const images = params.referenceImageMultiple;
+      const extracted = params.referenceInformationExtractedMultiple;
+      const strength = params.referenceStrengthMultiple;
+
+      body.parameters.reference_image_multiple = images.map(encodeBase64);
+      body.parameters.reference_information_extracted_multiple = Array.from(
+        { length: images.length },
+        (_, i) => extracted[i] ?? 1
+      );
+      body.parameters.reference_strength_multiple = Array.from(
+        { length: images.length },
+        (_, i) => strength[i] ?? 0.6
       );
     }
-
-    const images = params.referenceImageMultiple;
-    const extracted = params.referenceInformationExtractedMultiple;
-    const strength = params.referenceStrengthMultiple;
-
-    body.parameters.reference_image_multiple = images.map(encodeBase64);
-    body.parameters.reference_information_extracted_multiple = Array.from(
-      { length: images.length },
-      (_, i) => extracted[i] ?? 1
-    );
-    body.parameters.reference_strength_multiple = Array.from(
-      { length: images.length },
-      (_, i) => strength[i] ?? 0.6
-    );
-  } else if ("referenceImage" in params && params.referenceImage) {
-    body.parameters.reference_image = encodeBase64(params.referenceImage);
-    body.parameters.reference_information_extracted =
-      params.referenceInformationExtracted ?? 1;
-    body.parameters.reference_strength = params.referenceStrength ?? 0.6;
   }
 
   if ("image" in params && params.image) {
@@ -598,7 +608,18 @@ function isV4XModel(model: NovelAIDiffusionModels) {
     model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
     model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
-    model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Full
+  );
+}
+
+function isViveTransferAvailable(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionAnimeV3 ||
+    model === NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting
   );
 }
 
