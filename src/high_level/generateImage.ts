@@ -94,6 +94,7 @@ export type GenerateImageArgs = {
   };
   smea?:
     | {
+        auto?: boolean;
         dyn?: boolean;
       }
     | boolean;
@@ -104,7 +105,7 @@ export type GenerateImageArgs = {
     mask: Blob | Uint8Array;
     /** 0 to 1 ("inpaintImg2ImgStrength") */
     sourceStrength?: number;
-    overlayOriginalImage: boolean;
+    addOriginalImage: boolean;
   };
 };
 
@@ -264,8 +265,7 @@ export async function generateImage(
     characterPrompts,
     model,
     scale,
-    sm: !!smea,
-    smDyn: typeof smea === "boolean" ? false : !!smea?.dyn,
+    smea,
     legacyUC: v4LegacyConditioning,
     qualityToggle: !!qualityTags,
     sampler: sampler,
@@ -305,7 +305,7 @@ export async function generateImage(
       ? {
           mask: (await convertToPng(inpainting.mask)).buffer,
           sourceStrength: inpainting.sourceStrength,
-          addOriginalImage: inpainting.overlayOriginalImage,
+          addOriginalImage: inpainting.addOriginalImage,
         }
       : {}),
     ...disableSmeaOverride,
@@ -433,8 +433,12 @@ type GenerateImageParams = {
   sampler: NovelAIImageSamplers;
   scale: number;
   seed: number;
-  sm: boolean;
-  smDyn: boolean;
+  smea:
+    | {
+        auto?: boolean;
+        dyn?: boolean;
+      }
+    | boolean;
   steps: number;
 
   width: number;
@@ -490,8 +494,9 @@ function getGenerateImageParams(
       sampler: params.sampler ?? "k_euler",
       scale: params.scale ?? 5,
       seed: params.seed ?? 0,
-      sm: params.sm ?? false,
-      sm_dyn: params.smDyn ?? false,
+      sm: params.smea ? !!params.smea : false,
+      sm_dyn: typeof params.smea === "boolean" ? false : !!params.smea?.dyn,
+      autoSmea: typeof params.smea === "boolean" || params.smea?.auto,
       steps: params.steps ?? 28,
       width: nearest64(params.width ?? 512),
       height: nearest64(params.height ?? 512),
