@@ -494,7 +494,10 @@ function getGenerateImageParams(
       sampler: params.sampler ?? "k_euler",
       scale: params.scale ?? 5,
       seed: params.seed ?? 0,
-      sm: params.smea ? !!params.smea : false,
+      sm:
+        isSmeaAvailableModel(params.model!) && params.smea
+          ? !!params.smea
+          : false,
       sm_dyn: typeof params.smea === "boolean" ? false : !!params.smea?.dyn,
       autoSmea: typeof params.smea === "boolean" || params.smea?.auto,
       steps: params.steps ?? 28,
@@ -576,19 +579,21 @@ function getGenerateImageParams(
         );
       }
 
-      const images = params.referenceImageMultiple;
-      const extracted = params.referenceInformationExtractedMultiple;
-      const strength = params.referenceStrengthMultiple;
+      if (params.referenceImageMultiple.length > 0) {
+        const images = params.referenceImageMultiple;
+        const extracted = params.referenceInformationExtractedMultiple;
+        const strength = params.referenceStrengthMultiple;
 
-      body.parameters.reference_image_multiple = images.map(encodeBase64);
-      body.parameters.reference_information_extracted_multiple = Array.from(
-        { length: images.length },
-        (_, i) => extracted[i] ?? 1
-      );
-      body.parameters.reference_strength_multiple = Array.from(
-        { length: images.length },
-        (_, i) => strength[i] ?? 0.6
-      );
+        body.parameters.reference_image_multiple = images.map(encodeBase64);
+        body.parameters.reference_information_extracted_multiple = Array.from(
+          { length: images.length },
+          (_, i) => extracted[i] ?? 1
+        );
+        body.parameters.reference_strength_multiple = Array.from(
+          { length: images.length },
+          (_, i) => strength[i] ?? 0.6
+        );
+      }
     }
   }
 
@@ -620,6 +625,10 @@ function isV4XModel(model: NovelAIDiffusionModels) {
     model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Full
   );
+}
+
+function isSmeaAvailableModel(model: NovelAIDiffusionModels): boolean {
+  return !isV4XModel(model);
 }
 
 function isViveTransferAvailable(model: NovelAIDiffusionModels): boolean {
