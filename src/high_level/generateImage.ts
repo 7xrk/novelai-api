@@ -102,6 +102,8 @@ export type GenerateImageArgs = {
   inpainting?: {
     /** any image type blob, white is inpainting */
     mask: Blob | Uint8Array;
+    /** 0 to 1 ("inpaintImg2ImgStrength") */
+    sourceStrength?: number;
     overlayOriginalImage: boolean;
   };
 };
@@ -302,6 +304,7 @@ export async function generateImage(
     ...(inpainting
       ? {
           mask: (await convertToPng(inpainting.mask)).buffer,
+          sourceStrength: inpainting.sourceStrength,
           addOriginalImage: inpainting.overlayOriginalImage,
         }
       : {}),
@@ -455,6 +458,7 @@ type Image2ImageParams = GenerateImageParams & {
 type InpaintParams = GenerateImageParams &
   Image2ImageParams & {
     addOriginalImage: boolean;
+    sourceStrength?: number;
     mask?: Uint8Array;
   };
 
@@ -596,6 +600,7 @@ function getGenerateImageParams(
     body.action = "infill";
     body.parameters.mask = encodeBase64(params.mask);
     body.parameters.add_original_image = params.addOriginalImage ?? true;
+    body.parameters.inpaintImg2ImgStrength = params.sourceStrength;
   }
 
   return body;
