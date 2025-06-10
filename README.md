@@ -2,6 +2,10 @@
 
 NovelAI Image Generation API Client for Deno and Node.js
 
+## Status
+
+Supports NovelAI Image Generation API v3 to v4.5
+
 ## Example
 
 ### Image Generation Example

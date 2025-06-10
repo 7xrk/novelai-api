@@ -28,7 +28,7 @@ const result = await generateImage(session, {
   ucPreset: NovelAIImageUCPresetType.Heavy,
   model: NovelAIDiffusionModels.NAIDiffusionV4_5Full,
   size: NovelAIImageSizePreset.NORMAL_LANDSCAPE,
-  smea: { dyn: true },
+  smea: { auto: false },
   // img2img: {
   //   keepAspect: true,
   //   image: Deno.readFileSync("./tmp/test.png"),
