@@ -40,7 +40,12 @@ export type GenerateImageResponse = {
 export type GenerateImageStreamResponse = ReadableStream<
   | {
       type: "event";
-      data: string;
+      data: {
+        samp_ix: number;
+        step_ix: number;
+        gen_id: number;
+        sigma: number;
+      };
     }
   | {
       type: "data";
@@ -220,7 +225,7 @@ export async function generateImageStream(
           if (event.type === "event") {
             controller.enqueue({
               type: "event",
-              data: event.data,
+              data: JSON.parse(event.data),
             });
           } else if (event.type === "data") {
             const data = JSON.parse(event.data);
