@@ -51,7 +51,6 @@ export type GenerateImageStreamResponse = ReadableStream<
             gen_id: number;
             image: string;
             params: Record<string, string | object>;
-            files: Blob[];
           }
         | {
             event_type: "intermediate";
@@ -233,14 +232,16 @@ export async function generateImageStream(
                 }
               }
 
-              Object.assign(data, {
-                params: {
-                  ...body,
-                  input_original: params.prompt,
-                  negative_prompt_original: params.undesiredContent,
-                },
-                files,
-              });
+              event.data = JSON.stringify(
+                Object.assign(data, {
+                  params: {
+                    ...body,
+                    input_original: params.prompt,
+                    negative_prompt_original: params.undesiredContent,
+                  },
+                  files,
+                })
+              );
             }
 
             controller.enqueue({
