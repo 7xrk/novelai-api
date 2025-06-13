@@ -51,3 +51,54 @@ export const rescue: {
 export const safeJsonParse = <T = any>(json: string): Result<T> => {
   return rescue(() => JSON.parse(json));
 };
+
+export const responseToEventStream = (res: Response) => {
+  return new ReadableStream<{
+    type: "event" | "data";
+    data: string;
+  }>({
+    async start(controller) {
+      const decoder = new TextDecoder();
+
+      let currentType = "";
+      let currentChunk = "";
+
+      for await (const value of res.body!) {
+        const decoded = decoder.decode(value);
+        const lines = decoded.split("\n").filter((line) => line.trim() !== "");
+
+        lines.forEach((line) => {
+          const [eventType, data] = line.split(": ", 2).map((v) => v.trim());
+
+          if (
+            eventType !== "error" &&
+            eventType !== "event" &&
+            eventType !== "data"
+          ) {
+            currentChunk += decoded;
+            return;
+          } else {
+            if (currentType !== eventType) {
+              controller.enqueue({
+                type: currentType as "event" | "data",
+                data: currentChunk,
+              });
+
+              currentType = eventType;
+              currentChunk = data || "";
+            }
+          }
+        });
+      }
+
+      if (currentType || currentChunk) {
+        controller.enqueue({
+          type: currentType as "event" | "data",
+          data: currentChunk,
+        });
+      }
+
+      controller.close();
+    },
+  });
+};

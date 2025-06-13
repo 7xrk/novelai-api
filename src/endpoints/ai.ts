@@ -26,6 +26,22 @@ export async function apiAiGenerateImageSuggestTags(
   );
 }
 
+export async function apiAiGenerateImageStream(
+  session: INovelAISession,
+  body: object
+): Promise<Response> {
+  return await session.req(
+    "https://image.novelai.net/ai/generate-image-stream",
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
+
 export async function apiAiGenerateImage(
   session: INovelAISession,
   body: object

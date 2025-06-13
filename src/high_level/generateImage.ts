@@ -1,5 +1,8 @@
 import { fit } from "object-fit-math";
-import { apiAiGenerateImage } from "../endpoints/ai.ts";
+import {
+  apiAiGenerateImage,
+  apiAiGenerateImageStream,
+} from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import {
   type Size,
@@ -10,7 +13,11 @@ import {
   resizeImage,
   loadImageAsImageData,
 } from "./utils.ts";
-import { encodeBase64, safeJsonParse } from "../utils.ts";
+import {
+  encodeBase64,
+  responseToEventStream,
+  safeJsonParse,
+} from "../utils.ts";
 import { unzip } from "unzipit";
 import {
   type NovelAIImageExtraPresetType,
@@ -109,151 +116,148 @@ export type GenerateImageArgs = {
   };
 };
 
+export async function generateImageStream(
+  session: INovelAISession,
+  params: GenerateImageArgs
+) {
+  params = await checkAndNormalizeParams(params);
+
+  const body = getGenerateImageParams({
+    ...params,
+    legacyUC: params.v4LegacyConditioning,
+    qualityToggle: !!params.qualityTags,
+    dynamicThresholding: params.guidance?.decrisp,
+    skipCfgAboveSigma:
+      typeof params.guidance?.variety === "number"
+        ? params.guidance.variety
+        : params.guidance?.variety === true
+        ? SKIP_CFG_ABOVE_SIGMA_VALUE
+        : null,
+    ...(params.img2img
+      ? {
+          image: (await convertToPng(params.img2img.image)).buffer,
+          strength: params.img2img.strength,
+          noise: params.img2img.noise,
+          extraNoiseSeed: params.img2img.noiseSeed ?? params.seed,
+        }
+      : {}),
+    ...(params.viveTransfer && {
+      referenceImageMultiple: await Promise.all(
+        params.viveTransfer.map(async (v) =>
+          "image" in v
+            ? new Uint8Array((await convertToPng(v.image)).buffer)
+            : v.encodedVibe
+        )
+      ),
+      referenceInformationExtractedMultiple: params.viveTransfer.map((v) =>
+        isV4XModel(params.model!) && "informationExtracted" in v
+          ? v.informationExtracted
+          : undefined
+      ),
+      referenceStrengthMultiple: params.viveTransfer.map((v) => v.strength),
+    }),
+    ...(params.inpainting
+      ? {
+          mask: (await convertToPng(params.inpainting.mask)).buffer,
+          sourceStrength: params.inpainting.sourceStrength,
+          addOriginalImage: params.inpainting.addOriginalImage,
+        }
+      : {}),
+  });
+
+  try {
+    const res = await apiAiGenerateImageStream(session, body);
+
+    if (!res.ok) {
+      const body = await res.text();
+      const json = safeJsonParse(body);
+
+      if (json.ok && json.result?.message) {
+        throw new Error(`Failed to generate image: ${json.result.message}`);
+      } else {
+        throw new Error("Failed to generate image", {
+          cause: new Error(body),
+        });
+      }
+    }
+
+    const eventStream = responseToEventStream(res);
+
+    return new ReadableStream<
+      | {
+          type: "event";
+          data: string;
+        }
+      | {
+          type: "data";
+          data:
+            | {
+                event_type: "final";
+                samp_ix: number;
+                gen_id: number;
+                image: string;
+              }
+            | {
+                event_type: "intermediate";
+                samp_ix: number;
+                step_ix: number;
+                gen_id: number;
+                sigma: number;
+                image: string;
+              };
+        }
+    >({
+      async start(controller) {
+        for await (const event of eventStream) {
+          // console.log(event.data, event.type);
+          if (event.type === "event") {
+            controller.enqueue({
+              type: "event",
+              data: event.data,
+            });
+          } else if (event.type === "data") {
+            controller.enqueue({
+              type: "data",
+              data: JSON.parse(event.data),
+            });
+          }
+        }
+        controller.close();
+      },
+    });
+  } catch (e) {
+    throw new ImageGenerationError((e as Error).message, {
+      cause: e,
+      params: body,
+    });
+  }
+}
+
 export async function generateImage(
   session: INovelAISession,
-  {
-    prompt,
-    undesiredContent,
-    ucPreset,
-    model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
-    sampler = NovelAIImageSamplers.Euler,
-    noiseSchedule = NovelAINoiseSchedulers.Native,
+  params: GenerateImageArgs
+): Promise<GenerateImageResponse> {
+  const {
+    prompt: finalPrompt,
+    undesiredContent: finalUndesired,
+    model,
+    sampler,
+    noiseSchedule,
     characterPrompts,
-    extraPreset,
     v4LegacyConditioning,
-    scale = 5,
-    steps = 28,
-    size = { width: 512, height: 512 },
+    scale,
+    steps,
+    size: { width, height },
     nSamples,
-    qualityTags = true,
-    promptGuideRescale = 0,
+    qualityTags,
+    promptGuideRescale,
     guidance,
     smea,
-    limitToFreeInOpus,
     seed,
     img2img,
     viveTransfer,
     inpainting,
-  }: GenerateImageArgs
-): Promise<GenerateImageResponse> {
-  let { width, height } = size;
-
-  if (!isCharacterPromptsAvailable(model) && characterPrompts) {
-    throw new Error("characterPrompts is only supported with NovelAI V4 model");
-  }
-
-  if (isV4XModel(model) && viveTransfer) {
-    const hasOldVibeInput = viveTransfer.some((v) => "image" in v);
-
-    if (hasOldVibeInput) {
-      throw new Error(
-        "Vive Transfer with Image is not supported with NovelAI V4 model"
-      );
-    }
-  } else if (!isV4XModel(model) && viveTransfer) {
-    const hasEncodedVibeInput = viveTransfer.some((v) => "encodedVibe" in v);
-
-    if (hasEncodedVibeInput) {
-      throw new Error(
-        "Vive Transfer with Encoded Vibe is not supported with NovelAI V3 model"
-      );
-    }
-  }
-
-  let i2iImageSize: Size | undefined;
-  if (img2img?.keepAspect) {
-    const img = await loadImage(
-      img2img.image instanceof Blob
-        ? new Uint8Array(await img2img.image.arrayBuffer())
-        : img2img.image
-    );
-
-    i2iImageSize = { width: img.width, height: img.height };
-  }
-
-  if (limitToFreeInOpus) {
-    steps = Math.min(steps, 28);
-  }
-
-  // NOTE: 1536x2048 is the maximum resolution for the model
-  [width, height] = getGenerateResolution({
-    size: { width, height },
-    sourceImage: img2img?.keepAspect
-      ? {
-          width: i2iImageSize?.width!,
-          height: i2iImageSize?.height!,
-          keepAspect: true,
-        }
-      : undefined,
-    limitToFreeInOpus,
-  });
-
-  if (img2img) {
-    img2img.image = await resizeImage(img2img.image, { width, height });
-  }
-
-  if (inpainting) {
-    if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
-      model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
-    } else if (isV4XModel(model)) {
-      switch (model) {
-        case NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview:
-          model = NovelAIDiffusionModels.NAIDiffusionV4CuratedInpainting;
-          break;
-        case NovelAIDiffusionModels.NAIDiffusionV4Full:
-          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
-          break;
-        case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
-          model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
-          break;
-        case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
-          // TODO: Update to v4.5 inpainting model when available
-          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
-          break;
-      }
-
-      // NovelAI V4 requires 8px binary mask
-      const resized = await resizeImage(inpainting.mask, { width, height });
-      const imgData = await convertToPng(
-        binarizeImage(await loadImageAsImageData(resized), 8)
-      );
-      inpainting.mask = new Uint8Array(imgData.buffer);
-    }
-  }
-
-  let finalPrompt = prompt;
-  let finalUndesired = undesiredContent ?? "";
-
-  if (extraPreset) {
-    const presetPrompt = NovelAIAImageExtraPresets[extraPreset];
-    finalPrompt += presetPrompt;
-  }
-
-  if (qualityTags) {
-    finalPrompt += getQualityTags(model);
-  }
-
-  if (ucPreset) {
-    finalUndesired =
-      getUndesiredQualityTags(model, ucPreset) + (finalUndesired ?? "");
-  }
-
-  seed ??= randomInt();
-
-  const disableSmeaOverride = isV4XModel(model)
-    ? {
-        sm: false,
-        smDyn: false,
-      }
-    : {};
-
-  if (!isViveTransferAvailable(model) && viveTransfer) {
-    console.info(
-      `Vive Transfer is not available for model ${model}. Skip to attach reference images.`
-    );
-
-    viveTransfer = undefined;
-  }
+  } = await checkAndNormalizeParams(params);
 
   const body = getGenerateImageParams({
     input: finalPrompt,
@@ -308,7 +312,6 @@ export async function generateImage(
           addOriginalImage: inpainting.addOriginalImage,
         }
       : {}),
-    ...disableSmeaOverride,
   });
 
   try {
@@ -339,8 +342,8 @@ export async function generateImage(
     return {
       params: {
         ...body,
-        input_original: prompt,
-        negative_prompt_original: undesiredContent,
+        input_original: params.prompt,
+        negative_prompt_original: params.undesiredContent,
       },
       files: images,
     };
@@ -465,6 +468,176 @@ type InpaintParams = GenerateImageParams &
     sourceStrength?: number;
     mask?: Uint8Array;
   };
+
+async function checkAndNormalizeParams({
+  prompt,
+  undesiredContent,
+  ucPreset,
+  model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
+  sampler = NovelAIImageSamplers.Euler,
+  noiseSchedule = NovelAINoiseSchedulers.Native,
+  characterPrompts,
+  extraPreset,
+  v4LegacyConditioning,
+  scale = 5,
+  steps = 28,
+  size = { width: 512, height: 512 },
+  nSamples,
+  qualityTags = true,
+  promptGuideRescale = 0,
+  guidance,
+  smea,
+  limitToFreeInOpus,
+  seed,
+  img2img,
+  viveTransfer,
+  inpainting,
+}: GenerateImageArgs) {
+  let { width, height } = size;
+
+  if (!isCharacterPromptsAvailable(model) && characterPrompts) {
+    throw new Error("characterPrompts is only supported with NovelAI V4 model");
+  }
+
+  if (isV4XModel(model) && viveTransfer) {
+    const hasOldVibeInput = viveTransfer.some((v) => "image" in v);
+
+    if (hasOldVibeInput) {
+      throw new Error(
+        "Vive Transfer with Image is not supported with NovelAI V4 model"
+      );
+    }
+  } else if (!isV4XModel(model) && viveTransfer) {
+    const hasEncodedVibeInput = viveTransfer.some((v) => "encodedVibe" in v);
+
+    if (hasEncodedVibeInput) {
+      throw new Error(
+        "Vive Transfer with Encoded Vibe is not supported with NovelAI V3 model"
+      );
+    }
+  }
+
+  let i2iImageSize: Size | undefined;
+  if (img2img?.keepAspect) {
+    const img = await loadImage(
+      img2img.image instanceof Blob
+        ? new Uint8Array(await img2img.image.arrayBuffer())
+        : img2img.image
+    );
+
+    i2iImageSize = { width: img.width, height: img.height };
+  }
+
+  if (limitToFreeInOpus) {
+    steps = Math.min(steps, 28);
+  }
+
+  // NOTE: 1536x2048 is the maximum resolution for the model
+  [width, height] = getGenerateResolution({
+    size: { width, height },
+    sourceImage: img2img?.keepAspect
+      ? {
+          width: i2iImageSize?.width!,
+          height: i2iImageSize?.height!,
+          keepAspect: true,
+        }
+      : undefined,
+    limitToFreeInOpus,
+  });
+
+  if (img2img) {
+    img2img.image = await resizeImage(img2img.image, { width, height });
+  }
+
+  if (inpainting) {
+    if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
+      model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
+    } else if (isV4XModel(model)) {
+      switch (model) {
+        case NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview:
+          model = NovelAIDiffusionModels.NAIDiffusionV4CuratedInpainting;
+          break;
+        case NovelAIDiffusionModels.NAIDiffusionV4Full:
+          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+          break;
+        case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
+          model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
+          break;
+        case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
+          // TODO: Update to v4.5 inpainting model when available
+          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+          break;
+      }
+
+      // NovelAI V4 requires 8px binary mask
+      const resized = await resizeImage(inpainting.mask, { width, height });
+      const imgData = await convertToPng(
+        binarizeImage(await loadImageAsImageData(resized), 8)
+      );
+      inpainting.mask = new Uint8Array(imgData.buffer);
+    }
+  }
+
+  let finalPrompt = prompt;
+  let finalUndesired = undesiredContent ?? "";
+
+  if (extraPreset) {
+    const presetPrompt = NovelAIAImageExtraPresets[extraPreset];
+    finalPrompt += presetPrompt;
+  }
+
+  if (qualityTags) {
+    finalPrompt += getQualityTags(model);
+  }
+
+  if (ucPreset) {
+    finalUndesired =
+      getUndesiredQualityTags(model, ucPreset) + (finalUndesired ?? "");
+  }
+
+  seed ??= randomInt();
+
+  const disableSmeaOverride = isV4XModel(model)
+    ? {
+        sm: false,
+        smDyn: false,
+      }
+    : {};
+
+  if (!isViveTransferAvailable(model) && viveTransfer) {
+    console.info(
+      `Vive Transfer is not available for model ${model}. Skip to attach reference images.`
+    );
+
+    viveTransfer = undefined;
+  }
+
+  return {
+    prompt: finalPrompt,
+    undesiredContent: finalUndesired,
+    model,
+    sampler,
+    noiseSchedule,
+    characterPrompts,
+    v4LegacyConditioning: !!v4LegacyConditioning,
+    scale,
+    steps,
+    size: { width, height },
+    nSamples,
+    qualityTags,
+    promptGuideRescale,
+    guidance: {
+      decrisp: guidance?.decrisp ?? false,
+      variety: guidance?.variety ?? false,
+    },
+    smea: typeof smea === "boolean" ? { auto: smea } : smea,
+    seed,
+    img2img,
+    viveTransfer,
+    inpainting,
+    ...disableSmeaOverride,
+  } satisfies GenerateImageArgs;
+}
 
 function getGenerateImageParams(
   params:
