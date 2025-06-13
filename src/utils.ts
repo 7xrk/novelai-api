@@ -59,39 +59,73 @@ export const responseToEventStream = (res: Response) => {
   }>({
     async start(controller) {
       const decoder = new TextDecoder();
-
       let currentType = "";
       let currentChunk = "";
+      let invalidLines: string[] = [];
 
       for await (const value of res.body!) {
         const decoded = decoder.decode(value);
-        const lines = decoded.split("\n").filter((line) => line.trim() !== "");
+        const lines = decoded.split("\n").filter((line) => line !== "");
 
         lines.forEach((line) => {
-          const [eventType, data] = line.split(": ", 2).map((v) => v.trim());
+          const colonIndex = line.indexOf(": ");
 
-          if (
-            eventType !== "error" &&
-            eventType !== "event" &&
-            eventType !== "data"
-          ) {
-            currentChunk += decoded;
+          // Lines without ": "
+          if (colonIndex === -1) {
+            if (currentType) {
+              // Continuation line
+              currentChunk += line.trim();
+            } else {
+              // Invalid line before any event
+              invalidLines.push(line.trim());
+            }
             return;
-          } else {
-            if (currentType !== eventType) {
-              controller.enqueue({
-                type: currentType as "event" | "data",
-                data: currentChunk,
-              });
+          }
 
+          const eventType = line.substring(0, colonIndex).trim();
+          const data = line.substring(colonIndex + 2);
+
+          // Valid event types
+          if (
+            eventType === "error" ||
+            eventType === "event" ||
+            eventType === "data"
+          ) {
+            if (currentType !== eventType) {
+              // Emit previous event if exists
+              if (currentType) {
+                controller.enqueue({
+                  type: currentType as "event" | "data",
+                  data: currentChunk,
+                });
+              }
               currentType = eventType;
-              currentChunk = data || "";
+              currentChunk = data;
+
+              // Add any accumulated invalid lines
+              if (invalidLines.length > 0) {
+                currentChunk += currentChunk;
+                invalidLines = [];
+              }
+            } else {
+              // Same type - accumulate
+              currentChunk += data;
+            }
+          } else {
+            // Invalid event type
+            if (currentType) {
+              // Add to current event
+              currentChunk += " " + line.trim();
+            } else {
+              // Store for later
+              invalidLines.push(line.trim());
             }
           }
         });
       }
 
-      if (currentType || currentChunk) {
+      // Emit final event if exists
+      if (currentType) {
         controller.enqueue({
           type: currentType as "event" | "data",
           data: currentChunk,

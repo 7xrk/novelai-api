@@ -6,6 +6,7 @@ export {
   getGenerateResolution,
   type GenerateImageCharacterCaption,
   type GenerateImageCharacterPrompts,
+  type GenerateImageStreamResponse,
   type GenerateImageResponse,
   type GenerateImageArgs,
   enhanceImage,

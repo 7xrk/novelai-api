@@ -37,6 +37,33 @@ export type GenerateImageResponse = {
   files: Blob[];
 };
 
+export type GenerateImageStreamResponse = ReadableStream<
+  | {
+      type: "event";
+      data: string;
+    }
+  | {
+      type: "data";
+      data:
+        | {
+            event_type: "final";
+            samp_ix: number;
+            gen_id: number;
+            image: string;
+            params: Record<string, string | object>;
+            files: Blob[];
+          }
+        | {
+            event_type: "intermediate";
+            samp_ix: number;
+            step_ix: number;
+            gen_id: number;
+            sigma: number;
+            image: string;
+          };
+    }
+>;
+
 const SKIP_CFG_ABOVE_SIGMA_VALUE = 19;
 
 type Img2ImgImage = {
@@ -119,7 +146,7 @@ export type GenerateImageArgs = {
 export async function generateImageStream(
   session: INovelAISession,
   params: GenerateImageArgs
-) {
+): Promise<GenerateImageStreamResponse> {
   params = await checkAndNormalizeParams(params);
 
   const body = getGenerateImageParams({
@@ -183,30 +210,7 @@ export async function generateImageStream(
 
     const eventStream = responseToEventStream(res);
 
-    return new ReadableStream<
-      | {
-          type: "event";
-          data: string;
-        }
-      | {
-          type: "data";
-          data:
-            | {
-                event_type: "final";
-                samp_ix: number;
-                gen_id: number;
-                image: string;
-              }
-            | {
-                event_type: "intermediate";
-                samp_ix: number;
-                step_ix: number;
-                gen_id: number;
-                sigma: number;
-                image: string;
-              };
-        }
-    >({
+    return new ReadableStream({
       async start(controller) {
         for await (const event of eventStream) {
           // console.log(event.data, event.type);
@@ -216,6 +220,26 @@ export async function generateImageStream(
               data: event.data,
             });
           } else if (event.type === "data") {
+            const data = JSON.parse(event.data);
+
+            if (data.event_type === "final") {
+              const files: Blob[] = [];
+              if (data.files) {
+                for (const file of data.files) {
+                  files.push(new Blob([file], { type: "image/png" }));
+                }
+              }
+
+              Object.assign(data, {
+                params: {
+                  ...body,
+                  input_original: params.prompt,
+                  negative_prompt_original: params.undesiredContent,
+                },
+                files,
+              });
+            }
+
             controller.enqueue({
               type: "data",
               data: JSON.parse(event.data),

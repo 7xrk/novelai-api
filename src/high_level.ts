@@ -1,6 +1,7 @@
 export { augmentImage } from "./high_level/augmentImage.ts";
 export {
   type GenerateImageResponse,
+  type GenerateImageStreamResponse,
   type GenerateImageArgs,
   type GenerateImageCharacterCaption,
   type GenerateImageCharacterPrompts,
