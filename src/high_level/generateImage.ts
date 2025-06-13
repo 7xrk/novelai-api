@@ -202,33 +202,36 @@ export async function generateImageStream(
 
     return new ReadableStream({
       async start(controller) {
-        for await (const event of eventStream) {
-          // console.log(event.data, event.type);
-          if (event.type === "event") {
-            controller.enqueue({
-              type: "event",
-              data: event.data,
-            });
-          } else if (event.type === "data") {
-            const data = JSON.parse(event.data);
+        try {
+          for await (const event of eventStream) {
+            // console.log(event.data, event.type);
+            if (event.type === "event") {
+              controller.enqueue({
+                type: "event",
+                data: event.data,
+              });
+            } else if (event.type === "data") {
+              const data = JSON.parse(event.data);
 
-            event.data = JSON.stringify(
-              Object.assign(data, {
-                params: {
-                  ...body,
-                  input_original: params.prompt,
-                  negative_prompt_original: params.undesiredContent,
-                },
-              })
-            );
+              event.data = JSON.stringify(
+                Object.assign(data, {
+                  params: {
+                    ...body,
+                    input_original: params.prompt,
+                    negative_prompt_original: params.undesiredContent,
+                  },
+                })
+              );
 
-            controller.enqueue({
-              type: "data",
-              data: JSON.parse(event.data),
-            });
+              controller.enqueue({
+                type: "data",
+                data: JSON.parse(event.data),
+              });
+            }
           }
+        } finally {
+          controller.close();
         }
-        controller.close();
       },
     });
   } catch (e) {
