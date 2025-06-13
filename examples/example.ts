@@ -1,9 +1,11 @@
-import outdent from "outdent";
-import { load } from "https://deno.land/std@0.217.0/dotenv/mod.ts";
+import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
+import { decodeBase64 } from "jsr:@std/encoding/base64";
+import { load } from "jsr:@std/dotenv";
 import {
   NovelAIDiffusionModels,
   NovelAISession,
   generateImage,
+  generateImageStream,
   NovelAIImageSizePreset,
   NovelAIImageUCPresetType,
   encodeVibe,
@@ -16,7 +18,7 @@ const session = await NovelAISession.login(env["NAI_USER"], env["NAI_PASS"]);
 Deno.mkdirSync("./tmp", { recursive: true });
 
 console.log("generating");
-const result = await generateImage(session, {
+const response = await generateImage(session, {
   limitToFreeInOpus: true,
   prompt: outdent`2girls`,
   characterPrompts: {
@@ -36,7 +38,16 @@ const result = await generateImage(session, {
   // },
 });
 
-for (const file of result.files) {
+// for await (const event of response) {
+//   if (event.type === "data") {
+//     Deno.writeFileSync(
+//       `./tmp/test.png`,
+//       new Uint8Array(decodeBase64(event.data.image))
+//     );
+//   }
+// }
+
+for (const file of response.files) {
   const bin = await file.arrayBuffer();
   Deno.writeFileSync(`./tmp/test.png`, new Uint8Array(bin));
 }

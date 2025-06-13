@@ -149,48 +149,7 @@ export async function generateImageStream(
 ): Promise<GenerateImageStreamResponse> {
   params = await checkAndNormalizeParams(params);
 
-  const body = getGenerateImageParams({
-    ...params,
-    legacyUC: params.v4LegacyConditioning,
-    qualityToggle: !!params.qualityTags,
-    dynamicThresholding: params.guidance?.decrisp,
-    skipCfgAboveSigma:
-      typeof params.guidance?.variety === "number"
-        ? params.guidance.variety
-        : params.guidance?.variety === true
-        ? SKIP_CFG_ABOVE_SIGMA_VALUE
-        : null,
-    ...(params.img2img
-      ? {
-          image: (await convertToPng(params.img2img.image)).buffer,
-          strength: params.img2img.strength,
-          noise: params.img2img.noise,
-          extraNoiseSeed: params.img2img.noiseSeed ?? params.seed,
-        }
-      : {}),
-    ...(params.viveTransfer && {
-      referenceImageMultiple: await Promise.all(
-        params.viveTransfer.map(async (v) =>
-          "image" in v
-            ? new Uint8Array((await convertToPng(v.image)).buffer)
-            : v.encodedVibe
-        )
-      ),
-      referenceInformationExtractedMultiple: params.viveTransfer.map((v) =>
-        isV4XModel(params.model!) && "informationExtracted" in v
-          ? v.informationExtracted
-          : undefined
-      ),
-      referenceStrengthMultiple: params.viveTransfer.map((v) => v.strength),
-    }),
-    ...(params.inpainting
-      ? {
-          mask: (await convertToPng(params.inpainting.mask)).buffer,
-          sourceStrength: params.inpainting.sourceStrength,
-          addOriginalImage: params.inpainting.addOriginalImage,
-        }
-      : {}),
-  });
+  const body = await getGenerateImageParams(params);
 
   try {
     const res = await apiAiGenerateImageStream(session, body, {
@@ -225,13 +184,6 @@ export async function generateImageStream(
             const data = JSON.parse(event.data);
 
             if (data.event_type === "final") {
-              const files: Blob[] = [];
-              if (data.files) {
-                for (const file of data.files) {
-                  files.push(new Blob([file], { type: "image/png" }));
-                }
-              }
-
               event.data = JSON.stringify(
                 Object.assign(data, {
                   params: {
@@ -239,7 +191,6 @@ export async function generateImageStream(
                     input_original: params.prompt,
                     negative_prompt_original: params.undesiredContent,
                   },
-                  files,
                 })
               );
             }
@@ -265,82 +216,9 @@ export async function generateImage(
   session: INovelAISession,
   params: GenerateImageArgs
 ): Promise<GenerateImageResponse> {
-  const {
-    prompt: finalPrompt,
-    undesiredContent: finalUndesired,
-    model,
-    sampler,
-    noiseSchedule,
-    characterPrompts,
-    v4LegacyConditioning,
-    scale,
-    steps,
-    size: { width, height },
-    nSamples,
-    qualityTags,
-    promptGuideRescale,
-    guidance,
-    smea,
-    seed,
-    img2img,
-    viveTransfer,
-    inpainting,
-  } = await checkAndNormalizeParams(params);
+  params = await checkAndNormalizeParams(params);
 
-  const body = getGenerateImageParams({
-    input: finalPrompt,
-    steps,
-    nSamples,
-    width,
-    height,
-    negativePrompt: finalUndesired,
-    characterPrompts,
-    model,
-    scale,
-    smea,
-    legacyUC: v4LegacyConditioning,
-    qualityToggle: !!qualityTags,
-    sampler: sampler,
-    seed,
-    dynamicThresholding: guidance?.decrisp,
-    noiseSchedule,
-    // prettier-ignore
-    skipCfgAboveSigma:
-      typeof guidance?.variety === "number" ? guidance.variety
-        : guidance?.variety === true ? SKIP_CFG_ABOVE_SIGMA_VALUE
-        : null,
-    cfgRescale: promptGuideRescale,
-    ...(img2img
-      ? {
-          image: (await convertToPng(img2img.image)).buffer,
-          strength: img2img.strength,
-          noise: img2img.noise,
-          extraNoiseSeed: img2img.noiseSeed ?? seed,
-        }
-      : {}),
-    ...(viveTransfer && {
-      referenceImageMultiple: await Promise.all(
-        viveTransfer.map(async (v) =>
-          "image" in v
-            ? new Uint8Array((await convertToPng(v.image)).buffer)
-            : v.encodedVibe
-        )
-      ),
-      referenceInformationExtractedMultiple: viveTransfer.map((v) =>
-        isV4XModel(model) && "informationExtracted" in v
-          ? v.informationExtracted
-          : undefined
-      ),
-      referenceStrengthMultiple: viveTransfer.map((v) => v.strength),
-    }),
-    ...(inpainting
-      ? {
-          mask: (await convertToPng(inpainting.mask)).buffer,
-          sourceStrength: inpainting.sourceStrength,
-          addOriginalImage: inpainting.addOriginalImage,
-        }
-      : {}),
-  });
+  const body = await getGenerateImageParams(params);
 
   try {
     const res = await apiAiGenerateImage(session, body, {
@@ -439,65 +317,6 @@ export function getGenerateResolution({
 
   return [width, height];
 }
-
-type GenerateImageParams = {
-  action: "generate" | "img2img" | "infill";
-  input: string;
-  model: NovelAIDiffusionModels;
-  characterPrompts?: GenerateImageCharacterPrompts;
-
-  /** Prompt Guidance Rescale */
-  cfgRescale: number;
-  controlnetStrength: number;
-  dynamicThresholding: boolean;
-  skipCfgAboveSigma: number | null;
-  nSamples: number;
-  legacy: boolean;
-  legacyUC: boolean;
-  legacyV3Extend: boolean;
-
-  noiseSchedule: NovelAINoiseSchedulers;
-  qualityToggle: boolean;
-
-  // NC
-  negativePrompt: string;
-  uncondScale: number;
-
-  sampler: NovelAIImageSamplers;
-  scale: number;
-  seed: number;
-  smea:
-    | {
-        auto?: boolean;
-        dyn?: boolean;
-      }
-    | boolean;
-  steps: number;
-
-  width: number;
-  height: number;
-
-  referenceImageMultiple: Uint8Array[];
-  referenceInformationExtractedMultiple: (number | null | undefined)[];
-  referenceStrengthMultiple: (number | null | undefined)[];
-};
-
-type Text2ImageParams = GenerateImageParams;
-
-type Image2ImageParams = GenerateImageParams & {
-  /** Binary of png image */
-  image: Uint8Array;
-  strength: number;
-  noise: number;
-  extraNoiseSeed: number;
-};
-
-type InpaintParams = GenerateImageParams &
-  Image2ImageParams & {
-    addOriginalImage: boolean;
-    sourceStrength?: number;
-    mask?: Uint8Array;
-  };
 
 async function checkAndNormalizeParams({
   prompt,
@@ -669,31 +488,30 @@ async function checkAndNormalizeParams({
   } satisfies GenerateImageArgs;
 }
 
-function getGenerateImageParams(
-  params:
-    | Partial<Text2ImageParams>
-    | Partial<Image2ImageParams>
-    | Partial<InpaintParams>
-) {
+async function getGenerateImageParams(params: GenerateImageArgs) {
   // deno-lint-ignore no-explicit-any
   const body: any = {
     action: "generate",
-    input: params.input ?? "",
+    input: params.prompt ?? "",
     model: params.model ?? NovelAIDiffusionModels.NAIDiffusionAnimeV3,
     parameters: {
-      cfg_rescale: params.cfgRescale ?? 0,
-      controlnet_strength: params.controlnetStrength ?? 1,
-      dynamic_thresholding: params.dynamicThresholding ?? true,
-      skip_cfg_above_sigma: params.skipCfgAboveSigma ?? null,
-      legacy: params.legacy ?? false,
-      legacy_uc: params.legacyUC ?? false,
-      legacy_v3_extend: params.legacyV3Extend ?? false,
+      cfg_rescale: params.promptGuideRescale ?? 0,
+      controlnet_strength: 1,
+      dynamic_thresholding: params.guidance?.decrisp ?? true,
+      skip_cfg_above_sigma:
+        typeof params.guidance?.variety === "number"
+          ? params.guidance.variety
+          : params.guidance?.variety === true
+          ? SKIP_CFG_ABOVE_SIGMA_VALUE
+          : null,
+      legacy: false,
+      legacy_uc: params.v4LegacyConditioning ?? false,
+      legacy_v3_extend: false,
       n_samples: params.nSamples ?? 1,
-      negative_prompt: params.negativePrompt ?? "",
+      negative_prompt: params.undesiredContent ?? "",
       params_version: 3,
-      uncond_scale: params.uncondScale ?? 1,
       noise_schedule: params.noiseSchedule ?? NovelAINoiseSchedulers.Native,
-      qualityToggle: params.qualityToggle ?? false,
+      qualityToggle: params.qualityTags ?? false,
       sampler: params.sampler ?? "k_euler",
       scale: params.scale ?? 5,
       seed: params.seed ?? 0,
@@ -704,8 +522,8 @@ function getGenerateImageParams(
       sm_dyn: typeof params.smea === "boolean" ? false : !!params.smea?.dyn,
       autoSmea: typeof params.smea === "boolean" || params.smea?.auto,
       steps: params.steps ?? 28,
-      width: nearest64(params.width ?? 512),
-      height: nearest64(params.height ?? 512),
+      width: nearest64(params.size?.width ?? 512),
+      height: nearest64(params.size?.height ?? 512),
     },
   };
 
@@ -721,20 +539,20 @@ function getGenerateImageParams(
     // v4_prompt and v4_negative_prompt is required for V4 models
     // if missing it will result in an internal server error
     body.parameters.v4_negative_prompt = {
-      legacy_uc: !!params.legacyUC,
+      legacy_uc: !!params.v4LegacyConditioning,
       caption: {
-        base_caption: params.negativePrompt ?? "",
+        base_caption: params.undesiredContent ?? "",
         char_captions: [],
       },
     };
 
     body.parameters.v4_prompt = {
+      use_coords: false,
+      use_order: true,
       caption: {
-        base_caption: params.input ?? "",
+        base_caption: params.prompt ?? "",
         char_captions: [],
       },
-      use_coords: false,
-      use_order: false,
     };
 
     if (params.characterPrompts) {
@@ -765,27 +583,29 @@ function getGenerateImageParams(
     }
   }
 
-  if ("referenceImageMultiple" in params && params.referenceImageMultiple) {
-    if (!isViveTransferAvailable(params.model!)) {
+  if (params.viveTransfer) {
+    if (
+      !isViveTransferAvailable(params.model!) &&
+      params.viveTransfer.length > 0
+    ) {
       console.info(
         `Vive Transfer is not available for model ${params.model}. Skip to attach reference images.`
       );
     } else {
-      if (
-        params.referenceImageMultiple.length !==
-          params.referenceInformationExtractedMultiple?.length ||
-        params.referenceImageMultiple.length !==
-          params.referenceStrengthMultiple?.length
-      ) {
-        throw new Error(
-          "referenceImageMultiple, referenceInformationExtractedMultiple, and referenceStrengthMultiple must have the same length"
+      if (params.viveTransfer.length > 0) {
+        const images = await Promise.all(
+          params.viveTransfer.map(async (v) =>
+            "image" in v
+              ? new Uint8Array((await convertToPng(v.image)).buffer)
+              : v.encodedVibe
+          )
         );
-      }
-
-      if (params.referenceImageMultiple.length > 0) {
-        const images = params.referenceImageMultiple;
-        const extracted = params.referenceInformationExtractedMultiple;
-        const strength = params.referenceStrengthMultiple;
+        const extracted = params.viveTransfer.map((v) =>
+          isV4XModel(params.model!) && "informationExtracted" in v
+            ? v.informationExtracted
+            : undefined
+        );
+        const strength = params.viveTransfer.map((v) => v.strength);
 
         body.parameters.reference_image_multiple = images.map(encodeBase64);
         body.parameters.reference_information_extracted_multiple = Array.from(
@@ -800,20 +620,25 @@ function getGenerateImageParams(
     }
   }
 
-  if ("image" in params && params.image) {
+  if (params.img2img) {
     body.action = "img2img";
-    body.parameters.image = encodeBase64(params.image);
-    body.parameters.strength = params.strength ?? 0.5;
-    body.parameters.noise = params.noise ?? 0;
-    body.parameters.extra_noise_seed =
-      params.extraNoiseSeed ?? params.seed ?? 0;
+    body.parameters.image = encodeBase64(
+      Uint8Array.from((await convertToPng(params.img2img.image)).buffer)
+    );
+    body.parameters.strength = params.img2img.strength;
+    body.parameters.noise = params.img2img.noise;
+    body.parameters.extra_noise_seed = params.img2img.noiseSeed ?? params.seed;
   }
 
-  if ("mask" in params && params.mask) {
+  if (params.inpainting) {
     body.action = "infill";
-    body.parameters.mask = encodeBase64(params.mask);
-    body.parameters.add_original_image = params.addOriginalImage ?? true;
-    body.parameters.inpaintImg2ImgStrength = params.sourceStrength;
+    body.parameters.mask = encodeBase64(
+      Uint8Array.from((await convertToPng(params.inpainting.mask)).buffer)
+    );
+    body.parameters.add_original_image =
+      params.inpainting.addOriginalImage ?? true;
+    body.parameters.inpaintImg2ImgStrength =
+      params.inpainting.sourceStrength ?? 1;
   }
 
   return body;

@@ -1,6 +1,6 @@
 {
   "name": "@7xrk/novelai-api",
-  "version": "1.4.0-beta.6",
+  "version": "1.4.0-beta.7",
   "license": "Unlicense",
   "exports": "./mod.ts",
   "lint": {
@@ -18,7 +18,6 @@
     "@std/testing": "jsr:@std/testing@^1.0.14",
     "canvas": "https://deno.land/x/canvas@v1.4.1/mod.ts",
     "object-fit-math": "npm:object-fit-math@^1.0.0",
-    "outdent": "https://deno.land/x/outdent@v0.8.0/mod.ts",
     "unzipit": "npm:unzipit@^1.4.3"
   },
   "publish": {
