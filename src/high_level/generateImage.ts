@@ -170,6 +170,8 @@ export async function generateImageStream(
             },
           });
         }
+
+        controller.close();
       },
     });
   }
