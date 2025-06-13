@@ -59,6 +59,7 @@ export type GenerateImageStreamResponse = ReadableStream<
             gen_id: number;
             sigma: number;
             image: string;
+            params: Record<string, string | object>;
           };
     }
 >;
