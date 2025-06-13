@@ -141,6 +141,7 @@ export type GenerateImageArgs = {
     sourceStrength?: number;
     addOriginalImage: boolean;
   };
+  signal?: AbortSignal;
 };
 
 export async function generateImageStream(
@@ -193,7 +194,9 @@ export async function generateImageStream(
   });
 
   try {
-    const res = await apiAiGenerateImageStream(session, body);
+    const res = await apiAiGenerateImageStream(session, body, {
+      signal: params.signal,
+    });
 
     if (!res.ok) {
       const body = await res.text();
@@ -339,7 +342,9 @@ export async function generateImage(
   });
 
   try {
-    const res = await apiAiGenerateImage(session, body);
+    const res = await apiAiGenerateImage(session, body, {
+      signal: params.signal,
+    });
 
     if (!res.ok) {
       const body = await res.text();

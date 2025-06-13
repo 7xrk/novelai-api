@@ -28,14 +28,17 @@ export async function apiAiGenerateImageSuggestTags(
 
 export async function apiAiGenerateImageStream(
   session: INovelAISession,
-  body: object
+  body: object,
+  init: RequestInit = {}
 ): Promise<Response> {
   return await session.req(
     "https://image.novelai.net/ai/generate-image-stream",
     {
       method: "POST",
       body: JSON.stringify(body),
+      ...init,
       headers: {
+        ...init.headers,
         "Content-Type": "application/json",
       },
     }
@@ -44,12 +47,15 @@ export async function apiAiGenerateImageStream(
 
 export async function apiAiGenerateImage(
   session: INovelAISession,
-  body: object
+  body: object,
+  init: RequestInit = {}
 ): Promise<Response> {
   return await session.req("https://image.novelai.net/ai/generate-image", {
     method: "POST",
     body: JSON.stringify(body),
+    ...init,
     headers: {
+      ...init.headers,
       "Content-Type": "application/json",
     },
   });
@@ -71,7 +77,8 @@ export async function apiAiAugmentImage(
     image: Uint8Array;
     prompt?: string;
     reqType: NovelAIAugmentImageRequestTypes;
-  }
+  },
+  init: RequestInit = {}
 ): Promise<Response> {
   return await session.req("https://image.novelai.net/ai/augment-image", {
     method: "POST",
@@ -83,7 +90,9 @@ export async function apiAiAugmentImage(
       prompt,
       req_type: reqType,
     }),
+    ...init,
     headers: {
+      ...init.headers,
       Accept: "*/*",
       "Accept-Encoding": "gzip, deflate, br, zstd",
       "Content-Type": "application/json",
