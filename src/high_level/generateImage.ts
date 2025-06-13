@@ -183,17 +183,15 @@ export async function generateImageStream(
           } else if (event.type === "data") {
             const data = JSON.parse(event.data);
 
-            if (data.event_type === "final") {
-              event.data = JSON.stringify(
-                Object.assign(data, {
-                  params: {
-                    ...body,
-                    input_original: params.prompt,
-                    negative_prompt_original: params.undesiredContent,
-                  },
-                })
-              );
-            }
+            event.data = JSON.stringify(
+              Object.assign(data, {
+                params: {
+                  ...body,
+                  input_original: params.prompt,
+                  negative_prompt_original: params.undesiredContent,
+                },
+              })
+            );
 
             controller.enqueue({
               type: "data",
