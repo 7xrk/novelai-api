@@ -6,6 +6,7 @@ export {
   type GenerateImageCharacterPrompts,
   getGenerateResolution,
   generateImage,
+  generateImageStream,
 } from "./high_level/generateImage.ts";
 export { enhanceImage } from "./high_level/enhanceImage.ts";
 export { upscaleImage } from "./high_level/upscaleImage.ts";

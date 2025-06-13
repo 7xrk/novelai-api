@@ -2,6 +2,7 @@ export {
   upscaleImage,
   augmentImage,
   generateImage,
+  generateImageStream,
   getGenerateResolution,
   type GenerateImageCharacterCaption,
   type GenerateImageCharacterPrompts,
