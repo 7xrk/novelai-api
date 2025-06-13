@@ -21,10 +21,10 @@ import {
 import { unzip } from "unzipit";
 import {
   type NovelAIImageExtraPresetType,
-  type NovelAIImageUCPresetType,
   NovelAIAImageExtraPresets,
   NovelAIDiffusionModels,
   NovelAIImageSamplers,
+  NovelAIImageUCPresetType,
   NovelAINoiseSchedulers,
   NovelAIImageQualityPresets,
   NovelAIImageUCPresets,
@@ -148,6 +148,32 @@ export async function generateImageStream(
   session: INovelAISession,
   params: GenerateImageArgs
 ): Promise<GenerateImageStreamResponse> {
+  if (isV3Model(params.model ?? NovelAIDiffusionModels.NAIDiffusionV4_5Full)) {
+    // V3 models do not support stream generation
+    return new ReadableStream({
+      async start(controller) {
+        const res = await generateImage(session, params);
+
+        for (const file of res.files) {
+          controller.enqueue({
+            type: "event",
+            data: "final",
+          });
+          controller.enqueue({
+            type: "data",
+            data: {
+              event_type: "final",
+              samp_ix: 0,
+              gen_id: randomInt(),
+              image: encodeBase64(new Uint8Array(await file.arrayBuffer())),
+              params: res.params,
+            },
+          });
+        }
+      },
+    });
+  }
+
   params = await checkAndNormalizeParams(params);
 
   const body = await getGenerateImageParams(params);
@@ -321,7 +347,7 @@ async function checkAndNormalizeParams({
   prompt,
   undesiredContent,
   ucPreset,
-  model = NovelAIDiffusionModels.NAIDiffusionAnimeV3,
+  model = NovelAIDiffusionModels.NAIDiffusionV4_5Full,
   sampler = NovelAIImageSamplers.Euler,
   noiseSchedule = NovelAINoiseSchedulers.Native,
   characterPrompts,
@@ -651,6 +677,15 @@ function isV4XModel(model: NovelAIDiffusionModels) {
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Full
+  );
+}
+
+function isV3Model(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionAnimeV3 ||
+    model === NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionFurryV3 ||
+    model === NovelAIDiffusionModels.NAIDiffusionFurryV3Inpainting
   );
 }
 
