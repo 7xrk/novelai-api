@@ -74,7 +74,7 @@ export const responseToEventStream = (res: Response) => {
           if (colonIndex === -1) {
             if (currentType) {
               // Continuation line
-              currentChunk += line.trim();
+              currentChunk += " " + line.trim();
             } else {
               // Invalid line before any event
               invalidLines.push(line.trim());
@@ -104,12 +104,12 @@ export const responseToEventStream = (res: Response) => {
 
               // Add any accumulated invalid lines
               if (invalidLines.length > 0) {
-                currentChunk += currentChunk;
+                currentChunk += " " + invalidLines.join(" ");
                 invalidLines = [];
               }
             } else {
               // Same type - accumulate
-              currentChunk += data;
+              currentChunk += " " + data;
             }
           } else {
             // Invalid event type

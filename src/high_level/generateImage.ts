@@ -443,8 +443,7 @@ async function checkAndNormalizeParams({
           model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
           break;
         case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
-          // TODO: Update to v4.5 inpainting model when available
-          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+          model = NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting;
           break;
       }
 
@@ -681,7 +680,8 @@ function isV4XModel(model: NovelAIDiffusionModels) {
     model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
-    model === NovelAIDiffusionModels.NAIDiffusionV4_5Full
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting
   );
 }
 
