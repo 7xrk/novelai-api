@@ -138,7 +138,7 @@ export type GenerateImageArgs = {
     /** any image type blob, white is inpainting */
     mask: Blob | Uint8Array;
     /** 0 to 1 ("inpaintImg2ImgStrength") */
-    sourceStrength?: number;
+    strength?: number;
     addOriginalImage: boolean;
   };
   signal?: AbortSignal;
@@ -666,8 +666,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     );
     body.parameters.add_original_image =
       params.inpainting.addOriginalImage ?? true;
-    body.parameters.inpaintImg2ImgStrength =
-      params.inpainting.sourceStrength ?? 1;
+    body.parameters.inpaintImg2ImgStrength = params.inpainting.strength ?? 1;
   }
 
   return body;
