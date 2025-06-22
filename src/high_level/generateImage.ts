@@ -667,6 +667,11 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     body.parameters.add_original_image =
       params.inpainting.addOriginalImage ?? true;
     body.parameters.inpaintImg2ImgStrength = params.inpainting.strength ?? 1;
+
+    body.parameters.img2img = {
+      strength: params.inpainting.strength ?? 1,
+      color_correct: true,
+    };
   }
 
   return body;
