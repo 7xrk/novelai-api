@@ -7,7 +7,7 @@ export function argonHash(
   email: string,
   password: string,
   size: number,
-  domain: string
+  domain: string,
 ): Promise<string> {
   const enc = new TextEncoder();
 
@@ -30,7 +30,7 @@ export function argonHash(
 
 export async function getAccessKey(
   email: string,
-  password: string
+  password: string,
 ): Promise<string> {
   return (
     await argonHash(email, password, 64, "novelai_data_access_key")

@@ -13,7 +13,7 @@ export async function upscaleImage(
     /** NovelAI generated raw png binary */
     image: Uint8Array;
     scaleBy: number;
-  }
+  },
 ): Promise<{
   image: Blob;
 }> {
@@ -42,13 +42,13 @@ export async function upscaleImage(
   }
 
   const entries = Object.entries(
-    (await unzip(await res.arrayBuffer())).entries
+    (await unzip(await res.arrayBuffer())).entries,
   );
 
   const images = await Promise.all(
     entries.map(async ([, entry]) => {
       return new Blob([await entry.arrayBuffer()], { type: "image/png" });
-    })
+    }),
   );
 
   return {

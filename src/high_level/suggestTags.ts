@@ -21,7 +21,7 @@ export async function suggestTags(
   params: {
     model: NovelAIDiffusionModels;
     prompt: string;
-  }
+  },
 ): Promise<SuggestTagsResponse> {
   const hasJaString = UNICODE_REGEX.test(params.prompt);
 

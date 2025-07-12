@@ -7,7 +7,7 @@ export interface INovelAISession {
   // new({ accessToken }?: { accessToken?: string }): INovelAISession;
   login(
     email: string,
-    password: string
+    password: string,
   ): Promise<{ accessToken: string | null }>;
   req(path: string | URL, init?: RequestInit): Promise<Response>;
 }
@@ -21,7 +21,7 @@ export class NovelAISession implements INovelAISession {
 
   public static async login(
     email: string,
-    password: string
+    password: string,
   ): Promise<INovelAISession> {
     const session = new NovelAISession();
     await session.login(email, password);
@@ -34,7 +34,7 @@ export class NovelAISession implements INovelAISession {
 
   public async login(
     email: string,
-    password: string
+    password: string,
   ): Promise<{ accessToken: string | null }> {
     const accessKey = await this.getAccessKey(email, password);
 
@@ -73,7 +73,7 @@ export class NovelAISession implements INovelAISession {
 
   protected async getAccessKey(
     email: string,
-    password: string
+    password: string,
   ): Promise<string> {
     return (
       await argonHash(email, password, 64, "novelai_data_access_key")

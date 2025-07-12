@@ -65,6 +65,6 @@ const result = await upscaleImage(session, {
 
 Deno.writeFileSync(
   "output.png",
-  new Uint8Array(await result.image.arrayBuffer())
+  new Uint8Array(await result.image.arrayBuffer()),
 );
 ```

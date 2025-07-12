@@ -63,14 +63,14 @@ export async function augmentImage(
     | SketchAugmentParam
     | LineArtAugmentParam
     | ColorizeAugmentParam
-  )
+  ),
 ): Promise<AugmentImageResponse> {
   if (
     params.reqType === NovelAIAugmentImageRequestTypes.removeBg &&
     limitToFreeInOpus
   ) {
     throw new Error(
-      "removeBg request type is not supported in opus free generation"
+      "removeBg request type is not supported in opus free generation",
     );
   }
 
@@ -127,13 +127,13 @@ export async function augmentImage(
   }
 
   const entries = Object.entries(
-    (await unzip(await res.arrayBuffer())).entries
+    (await unzip(await res.arrayBuffer())).entries,
   );
 
   const images = await Promise.all(
     entries.map(async ([, entry]) => {
       return new Blob([await entry.arrayBuffer()], { type: "image/png" });
-    })
+    }),
   );
 
   return {

@@ -45,7 +45,7 @@ export async function encodeVibe(
     image: Uint8Array;
     informationExtracted: number;
     model: NovelAIDiffusionModels;
-  }
+  },
 ): Promise<{
   vibe: EncodedVibe;
 }> {
@@ -144,7 +144,7 @@ function toVibeHash(e: Record<string, any>) {
         let [t, i] = e;
         return "object" == typeof i ? `${t}:${JSON.stringify(i)}` : `${t}:${i}`;
       })
-      .join(",")
+      .join(","),
   );
 }
 
@@ -155,6 +155,6 @@ function sha256(e: string) {
     .then((e) =>
       [...new Uint8Array(e)]
         .map((e) => e.toString(16).padStart(2, "0"))
-        .join("")
+        .join(""),
     );
 }

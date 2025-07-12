@@ -9,7 +9,7 @@ import { loadImage } from "./utils.ts";
 export async function enhanceImage(
   session: INovelAISession,
   input: Exclude<GenerateImageArgs["img2img"], void> & { scaleBy: number },
-  { size, ...params }: Omit<GenerateImageArgs, "img2img" | "enhanceImg">
+  { size, ...params }: Omit<GenerateImageArgs, "img2img" | "enhanceImg">,
 ): Promise<GenerateImageResponse> {
   if (!size) {
     const img = await loadImage(input.image);

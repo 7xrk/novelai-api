@@ -146,7 +146,7 @@ export type GenerateImageArgs = {
 
 export async function generateImageStream(
   session: INovelAISession,
-  params: GenerateImageArgs
+  params: GenerateImageArgs,
 ): Promise<GenerateImageStreamResponse> {
   if (isV3Model(params.model ?? NovelAIDiffusionModels.NAIDiffusionV4_5Full)) {
     // V3 models do not support stream generation
@@ -220,7 +220,7 @@ export async function generateImageStream(
                     input_original: params.prompt,
                     negative_prompt_original: params.undesiredContent,
                   },
-                })
+                }),
               );
 
               controller.enqueue({
@@ -244,7 +244,7 @@ export async function generateImageStream(
 
 export async function generateImage(
   session: INovelAISession,
-  params: GenerateImageArgs
+  params: GenerateImageArgs,
 ): Promise<GenerateImageResponse> {
   params = await checkAndNormalizeParams(params);
 
@@ -269,7 +269,7 @@ export async function generateImage(
     }
 
     const entries = Object.entries(
-      (await unzip(await res.arrayBuffer())).entries
+      (await unzip(await res.arrayBuffer())).entries,
     );
 
     const images: Blob[] = [];
@@ -305,7 +305,7 @@ class ImageGenerationError extends Error {
 generateImage.variate = function variateImage(
   session: INovelAISession,
   img: Blob | Uint8Array,
-  params: Omit<GenerateImageArgs, "img2img" | "inpainting">
+  params: Omit<GenerateImageArgs, "img2img" | "inpainting">,
 ): Promise<GenerateImageResponse> {
   return generateImage(session, {
     ...params,
@@ -330,7 +330,7 @@ export function getGenerateResolution({
     const newSize = fit(
       { width, height },
       { width: sourceImage.width, height: sourceImage.height },
-      "contain"
+      "contain",
     );
 
     width = Math.round(newSize.width);
@@ -378,20 +378,20 @@ async function checkAndNormalizeParams({
     throw new Error("characterPrompts is only supported with NovelAI V4 model");
   }
 
-  if (isV4XModel(model) && viveTransfer) {
+  if (isEncodedVibeTransferRequired(model) && viveTransfer) {
     const hasOldVibeInput = viveTransfer.some((v) => "image" in v);
 
     if (hasOldVibeInput) {
       throw new Error(
-        "Vive Transfer with Image is not supported with NovelAI V4 model"
+        "Vive Transfer with Image is not supported with NovelAI V4 model",
       );
     }
-  } else if (!isV4XModel(model) && viveTransfer) {
+  } else if (!isImageVibeTransferRequired(model) && viveTransfer) {
     const hasEncodedVibeInput = viveTransfer.some((v) => "encodedVibe" in v);
 
     if (hasEncodedVibeInput) {
       throw new Error(
-        "Vive Transfer with Encoded Vibe is not supported with NovelAI V3 model"
+        "Vive Transfer with Encoded Vibe is not supported with NovelAI V3 model",
       );
     }
   }
@@ -401,7 +401,7 @@ async function checkAndNormalizeParams({
     const img = await loadImage(
       img2img.image instanceof Blob
         ? new Uint8Array(await img2img.image.arrayBuffer())
-        : img2img.image
+        : img2img.image,
     );
 
     i2iImageSize = { width: img.width, height: img.height };
@@ -429,31 +429,33 @@ async function checkAndNormalizeParams({
   }
 
   if (inpainting) {
-    if (model === NovelAIDiffusionModels.NAIDiffusionAnimeV3) {
-      model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
-    } else if (isV4XModel(model)) {
-      switch (model) {
-        case NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview:
-          model = NovelAIDiffusionModels.NAIDiffusionV4CuratedInpainting;
-          break;
-        case NovelAIDiffusionModels.NAIDiffusionV4Full:
-          model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
-          break;
-        case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
-          model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
-          break;
-        case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
-          model = NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting;
-          break;
-      }
-
-      // NovelAI V4 requires 8px binary mask
-      const resized = await resizeImage(inpainting.mask, { width, height });
-      const imgData = await convertToPng(
-        binarizeImage(await loadImageAsImageData(resized), 8)
-      );
-      inpainting.mask = new Uint8Array(imgData.buffer);
+    switch (model) {
+      case NovelAIDiffusionModels.NAIDiffusionAnimeV3:
+        model = NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionFurryV3:
+        model = NovelAIDiffusionModels.NAIDiffusionFurryV3Inpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview:
+        model = NovelAIDiffusionModels.NAIDiffusionV4CuratedInpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionV4Full:
+        model = NovelAIDiffusionModels.NAIDiffusionV4FullInpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
+        model = NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
+        model = NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting;
+        break;
     }
+
+    // NovelAI V4 requires 8px binary mask
+    const resized = await resizeImage(inpainting.mask, { width, height });
+    const imgData = await convertToPng(
+      binarizeImage(await loadImageAsImageData(resized), 8),
+    );
+    inpainting.mask = new Uint8Array(imgData.buffer);
   }
 
   let finalPrompt = prompt;
@@ -484,7 +486,7 @@ async function checkAndNormalizeParams({
 
   if (!isViveTransferAvailable(model) && viveTransfer) {
     console.info(
-      `Vive Transfer is not available for model ${model}. Skip to attach reference images.`
+      `Vive Transfer is not available for model ${model}. Skip to attach reference images.`,
     );
 
     viveTransfer = undefined;
@@ -531,8 +533,8 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
         typeof params.guidance?.variety === "number"
           ? params.guidance.variety
           : params.guidance?.variety === true
-          ? SKIP_CFG_ABOVE_SIGMA_VALUE
-          : null,
+            ? SKIP_CFG_ABOVE_SIGMA_VALUE
+            : null,
       legacy: false,
       legacy_uc: params.v4LegacyConditioning ?? false,
       legacy_v3_extend: false,
@@ -602,7 +604,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
         (v) => ({
           char_caption: v.uc ?? "",
           centers: [v.center ?? { x: 0.5, y: 0.5 }],
-        })
+        }),
       );
 
       body.parameters.v4_prompt.caption.char_captions = characters.map((v) => ({
@@ -618,7 +620,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
       params.viveTransfer.length > 0
     ) {
       console.info(
-        `Vive Transfer is not available for model ${params.model}. Skip to attach reference images.`
+        `Vive Transfer is not available for model ${params.model}. Skip to attach reference images.`,
       );
     } else {
       if (params.viveTransfer.length > 0) {
@@ -626,24 +628,24 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
           params.viveTransfer.map(async (v) =>
             "image" in v
               ? new Uint8Array((await convertToPng(v.image)).buffer)
-              : v.encodedVibe
-          )
+              : v.encodedVibe,
+          ),
         );
         const extracted = params.viveTransfer.map((v) =>
           isV4XModel(params.model!) && "informationExtracted" in v
             ? v.informationExtracted
-            : undefined
+            : undefined,
         );
         const strength = params.viveTransfer.map((v) => v.strength);
 
         body.parameters.reference_image_multiple = images.map(encodeBase64);
         body.parameters.reference_information_extracted_multiple = Array.from(
           { length: images.length },
-          (_, i) => extracted[i] ?? 1
+          (_, i) => extracted[i] ?? 1,
         );
         body.parameters.reference_strength_multiple = Array.from(
           { length: images.length },
-          (_, i) => strength[i] ?? 0.6
+          (_, i) => strength[i] ?? 0.6,
         );
       }
     }
@@ -652,8 +654,9 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
   if (params.img2img) {
     body.action = "img2img";
     body.parameters.image = encodeBase64(
-      Uint8Array.from((await convertToPng(params.img2img.image)).buffer)
+      Uint8Array.from((await convertToPng(params.img2img.image)).buffer),
     );
+
     body.parameters.strength = params.img2img.strength;
     body.parameters.noise = params.img2img.noise;
     body.parameters.extra_noise_seed = params.img2img.noiseSeed ?? params.seed;
@@ -662,7 +665,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
   if (params.inpainting) {
     body.action = "infill";
     body.parameters.mask = encodeBase64(
-      Uint8Array.from((await convertToPng(params.inpainting.mask)).buffer)
+      Uint8Array.from((await convertToPng(params.inpainting.mask)).buffer),
     );
     body.parameters.add_original_image =
       params.inpainting.addOriginalImage ?? true;
@@ -670,7 +673,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
 
     body.parameters.img2img = {
       strength: params.inpainting.strength ?? 1,
-      color_correct: true,
+      color_correct: false,
     };
   }
 
@@ -708,7 +711,32 @@ function isViveTransferAvailable(model: NovelAIDiffusionModels): boolean {
     model === NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting ||
     model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
     model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
-    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting
+    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting
+  );
+}
+
+function isImageVibeTransferRequired(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionAnimeV3 ||
+    model === NovelAIDiffusionModels.NAIDiffusionAnimeV3Inpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionFurryV3 ||
+    model === NovelAIDiffusionModels.NAIDiffusionFurryV3Inpainting
+  );
+}
+
+function isEncodedVibeTransferRequired(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4FullInpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting
   );
 }
 
@@ -726,13 +754,13 @@ function getQualityTags(model: NovelAIDiffusionModels) {
 
 function getUndesiredQualityTags(
   model: NovelAIDiffusionModels,
-  ucPreset: NovelAIImageUCPresetType
+  ucPreset: NovelAIImageUCPresetType,
 ) {
   const modelPresets = NovelAIImageUCPresets[model] as any;
 
   if (!modelPresets[ucPreset]) {
     console.info(
-      `Undesired quality tag "${ucPreset}" not found for model "${model}".`
+      `Undesired quality tag "${ucPreset}" not found for model "${model}".`,
     );
   }
   return modelPresets[ucPreset] ?? "";

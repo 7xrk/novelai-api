@@ -106,7 +106,7 @@ export function binarizeImage(input: ImageData, blockSize: number): ImageData {
 export function adjustResolution(
   width: number,
   height: number,
-  pixels: number
+  pixels: number,
 ): [number, number] {
   const currentPixels = width * height;
   const aspectRatio = width / height;

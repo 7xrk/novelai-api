@@ -11,7 +11,7 @@ export async function apiAiGenerateImageSuggestTags(
     model: NovelAIDiffusionModels;
     prompt: string;
     lang?: "jp" | undefined;
-  }
+  },
 ): Promise<Response> {
   const searchParams = new URLSearchParams();
   searchParams.set("model", params.model);
@@ -22,14 +22,14 @@ export async function apiAiGenerateImageSuggestTags(
     `https://image.novelai.net/ai/generate-image/suggest-tags?${searchParams}`,
     {
       method: "GET",
-    }
+    },
   );
 }
 
 export async function apiAiGenerateImageStream(
   session: INovelAISession,
   body: object,
-  init: RequestInit = {}
+  init: RequestInit = {},
 ): Promise<Response> {
   return await session.req(
     "https://image.novelai.net/ai/generate-image-stream",
@@ -41,14 +41,14 @@ export async function apiAiGenerateImageStream(
         ...init.headers,
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 }
 
 export async function apiAiGenerateImage(
   session: INovelAISession,
   body: object,
-  init: RequestInit = {}
+  init: RequestInit = {},
 ): Promise<Response> {
   return await session.req("https://image.novelai.net/ai/generate-image", {
     method: "POST",
@@ -78,7 +78,7 @@ export async function apiAiAugmentImage(
     prompt?: string;
     reqType: NovelAIAugmentImageRequestTypes;
   },
-  init: RequestInit = {}
+  init: RequestInit = {},
 ): Promise<Response> {
   return await session.req("https://image.novelai.net/ai/augment-image", {
     method: "POST",
@@ -112,7 +112,7 @@ export async function apiAiUpscale(
     width: number;
     height: number;
     scale: number;
-  }
+  },
 ): Promise<Response> {
   return await session.req("/ai/upscale", {
     method: "POST",
@@ -140,7 +140,7 @@ export async function apiAiEncodeVibe(
     image: Uint8Array;
     information_extracted: number;
     model: NovelAIDiffusionModels;
-  }
+  },
 ): Promise<Response> {
   return await session.req("https://image.novelai.net/ai/encode-vibe", {
     method: "POST",

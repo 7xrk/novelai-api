@@ -40,7 +40,7 @@ export type UserSubscriptionResponse = {
 };
 
 export async function userSubscription(
-  session: INovelAISession
+  session: INovelAISession,
 ): Promise<UserSubscriptionResponse> {
   const res = await apiUserSubscription(session);
 
