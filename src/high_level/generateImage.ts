@@ -5,13 +5,13 @@ import {
 } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import {
-  type Size,
-  convertToPng,
   adjustResolution,
+  convertToPng,
+  loadImageAsImageData,
   nearest64,
   randomInt,
   resizeImage,
-  loadImageAsImageData,
+  type Size,
 } from "./utils.ts";
 import {
   encodeBase64,
@@ -20,14 +20,14 @@ import {
 } from "../utils.ts";
 import { unzip } from "unzipit";
 import {
-  type NovelAIImageExtraPresetType,
   NovelAIAImageExtraPresets,
   NovelAIDiffusionModels,
+  type NovelAIImageExtraPresetType,
+  NovelAIImageQualityPresets,
   NovelAIImageSamplers,
+  NovelAIImageUCPresets,
   NovelAIImageUCPresetType,
   NovelAINoiseSchedulers,
-  NovelAIImageQualityPresets,
-  NovelAIImageUCPresets,
 } from "./consts.ts";
 import { binarizeImage } from "./utils.ts";
 import { loadImage } from "./utils.ts";
@@ -39,29 +39,29 @@ export type GenerateImageResponse = {
 
 export type GenerateImageStreamResponse = ReadableStream<
   | {
-      type: "event";
-      data: string;
-    }
+    type: "event";
+    data: string;
+  }
   | {
-      type: "data";
-      data:
-        | {
-            event_type: "final";
-            samp_ix: number;
-            gen_id: number;
-            image: string;
-            params: Record<string, string | object>;
-          }
-        | {
-            event_type: "intermediate";
-            samp_ix: number;
-            step_ix: number;
-            gen_id: number;
-            sigma: number;
-            image: string;
-            params: Record<string, string | object>;
-          };
-    }
+    type: "data";
+    data:
+      | {
+        event_type: "final";
+        samp_ix: number;
+        gen_id: number;
+        image: string;
+        params: Record<string, string | object>;
+      }
+      | {
+        event_type: "intermediate";
+        samp_ix: number;
+        step_ix: number;
+        gen_id: number;
+        sigma: number;
+        image: string;
+        params: Record<string, string | object>;
+      };
+  }
 >;
 
 const SKIP_CFG_ABOVE_SIGMA_VALUE = 19;
@@ -128,9 +128,9 @@ export type GenerateImageArgs = {
   };
   smea?:
     | {
-        auto?: boolean;
-        dyn?: boolean;
-      }
+      auto?: boolean;
+      dyn?: boolean;
+    }
     | boolean;
   img2img?: Img2ImgImage;
   viveTransfer?: (V3VibeTransferInput | V4VibeTransferInput)[];
@@ -416,10 +416,10 @@ async function checkAndNormalizeParams({
     size: { width, height },
     sourceImage: img2img?.keepAspect
       ? {
-          width: i2iImageSize?.width!,
-          height: i2iImageSize?.height!,
-          keepAspect: true,
-        }
+        width: i2iImageSize?.width!,
+        height: i2iImageSize?.height!,
+        keepAspect: true,
+      }
       : undefined,
     limitToFreeInOpus,
   });
@@ -628,21 +628,24 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
           params.viveTransfer.map(async (v) =>
             "image" in v
               ? new Uint8Array((await convertToPng(v.image)).buffer)
-              : v.encodedVibe,
+              : v.encodedVibe
           ),
         );
-        const extracted = params.viveTransfer.map((v) =>
-          isV4XModel(params.model!) && "informationExtracted" in v
-            ? v.informationExtracted
-            : undefined,
-        );
+
         const strength = params.viveTransfer.map((v) => v.strength);
 
+        if (!isEncodedVibeTransferRequired(params.model!)) {
+          const extracted = params.viveTransfer.map((v) =>
+            "informationExtracted" in v ? v.informationExtracted : undefined
+          );
+
+          body.parameters.reference_information_extracted_multiple = Array.from(
+            { length: images.length },
+            (_, i) => extracted[i] ?? 1,
+          );
+        }
+
         body.parameters.reference_image_multiple = images.map(encodeBase64);
-        body.parameters.reference_information_extracted_multiple = Array.from(
-          { length: images.length },
-          (_, i) => extracted[i] ?? 1,
-        );
         body.parameters.reference_strength_multiple = Array.from(
           { length: images.length },
           (_, i) => strength[i] ?? 0.6,
@@ -667,8 +670,8 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     body.parameters.mask = encodeBase64(
       Uint8Array.from((await convertToPng(params.inpainting.mask)).buffer),
     );
-    body.parameters.add_original_image =
-      params.inpainting.addOriginalImage ?? true;
+    body.parameters.add_original_image = params.inpainting.addOriginalImage ??
+      true;
     body.parameters.inpaintImg2ImgStrength = params.inpainting.strength ?? 1;
 
     body.parameters.img2img = {

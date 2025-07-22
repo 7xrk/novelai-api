@@ -68,8 +68,7 @@ export async function encodeVibe(
     id,
     encodings: {} as Record<string, any>,
     name: `${id.slice(0, 6)}-${id.slice(-6)}`,
-    thumbnail:
-      "data:image/png;base64," +
+    thumbnail: "data:image/png;base64," +
       encodeBase64(await resizeImage(image, { width: 256, height: 256 })),
     createdAt: Date.now(),
     importInfo: {
@@ -91,10 +90,12 @@ export async function encodeVibe(
   }
 
   vibe.encodings[getEncodingKey(model)] = {
-    [await toVibeHash({
-      information_extracted: 1,
-      mask: undefined,
-    })]: {
+    [
+      await toVibeHash({
+        information_extracted: 1,
+        mask: undefined,
+      })
+    ]: {
       encoding: encodeBase64(await res.arrayBuffer()),
       params: {
         information_extracted: informationExtracted,
@@ -155,6 +156,6 @@ function sha256(e: string) {
     .then((e) =>
       [...new Uint8Array(e)]
         .map((e) => e.toString(16).padStart(2, "0"))
-        .join(""),
+        .join("")
     );
 }
