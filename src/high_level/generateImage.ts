@@ -409,6 +409,10 @@ async function checkAndNormalizeParams({
 
   if (limitToFreeInOpus) {
     steps = Math.min(steps, 28);
+
+    if (isEncodedVibeTransferRequired(model)) {
+      viveTransfer = viveTransfer?.splice(0, 4);
+    }
   }
 
   // NOTE: 1536x2048 is the maximum resolution for the model
@@ -471,17 +475,17 @@ async function checkAndNormalizeParams({
   }
 
   if (ucPreset) {
-    finalUndesired =
-      getUndesiredQualityTags(model, ucPreset) + (finalUndesired ?? "");
+    finalUndesired = getUndesiredQualityTags(model, ucPreset) +
+      (finalUndesired ?? "");
   }
 
   seed ??= randomInt();
 
   const disableSmeaOverride = isV4XModel(model)
     ? {
-        sm: false,
-        smDyn: false,
-      }
+      sm: false,
+      smDyn: false,
+    }
     : {};
 
   if (!isViveTransferAvailable(model) && viveTransfer) {
@@ -529,12 +533,11 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
       cfg_rescale: params.promptGuideRescale ?? 0,
       controlnet_strength: 1,
       dynamic_thresholding: params.guidance?.decrisp ?? true,
-      skip_cfg_above_sigma:
-        typeof params.guidance?.variety === "number"
-          ? params.guidance.variety
-          : params.guidance?.variety === true
-            ? SKIP_CFG_ABOVE_SIGMA_VALUE
-            : null,
+      skip_cfg_above_sigma: typeof params.guidance?.variety === "number"
+        ? params.guidance.variety
+        : params.guidance?.variety === true
+        ? SKIP_CFG_ABOVE_SIGMA_VALUE
+        : null,
       legacy: false,
       legacy_uc: params.v4LegacyConditioning ?? false,
       legacy_v3_extend: false,
@@ -546,10 +549,9 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
       sampler: params.sampler ?? "k_euler",
       scale: params.scale ?? 5,
       seed: params.seed ?? 0,
-      sm:
-        isSmeaAvailableModel(params.model!) && params.smea
-          ? !!params.smea
-          : false,
+      sm: isSmeaAvailableModel(params.model!) && params.smea
+        ? !!params.smea
+        : false,
       sm_dyn: typeof params.smea === "boolean" ? false : !!params.smea?.dyn,
       autoSmea: typeof params.smea === "boolean" || params.smea?.auto,
       steps: params.steps ?? 28,
