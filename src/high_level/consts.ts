@@ -84,7 +84,9 @@ export const NovelAIAugmentImageRequestTypes = /* @__PURE__ */ {
 Object.freeze(NovelAIAugmentImageRequestTypes);
 
 export type NovelAIAugmentImageRequestTypes =
-  (typeof NovelAIAugmentImageRequestTypes)[keyof typeof NovelAIAugmentImageRequestTypes];
+  (typeof NovelAIAugmentImageRequestTypes)[
+    keyof typeof NovelAIAugmentImageRequestTypes
+  ];
 
 export const NovelAIImageAugmentEmotionType = /* @__PURE__ */ {
   neutral: "neutral",
@@ -115,7 +117,9 @@ export const NovelAIImageAugmentEmotionType = /* @__PURE__ */ {
 Object.freeze(NovelAIImageAugmentEmotionType);
 
 export type NovelAIImageAugmentEmotionType =
-  (typeof NovelAIImageAugmentEmotionType)[keyof typeof NovelAIImageAugmentEmotionType];
+  (typeof NovelAIImageAugmentEmotionType)[
+    keyof typeof NovelAIImageAugmentEmotionType
+  ];
 
 export const NovelAIImageUCPresetType = /* @__PURE__ */ {
   Heavy: "heavy",
@@ -161,14 +165,14 @@ export const NovelAIImageQualityPresets = {
     ", no text, best quality, very aesthetic, absurdres",
 
   [NovelAIDiffusionModels.NAIDiffusionV4_5Curated]:
-    ", very aesthetic, location, masterpiece, no text, -0.8::feet::, rating:general",
+    ", very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
   [NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting]:
-    ", very aesthetic, location, masterpiece, no text, -0.8::feet::, rating:general",
+    ", very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
 
   [NovelAIDiffusionModels.NAIDiffusionV4_5Full]:
-    ", location, very aesthetic, masterpiece, no text",
+    ", very aesthetic, masterpiece, no text",
   [NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting]:
-    ", location, very aesthetic, masterpiece, no text",
+    ", very aesthetic, masterpiece, no text",
 
   default: "masterpiece, best quality, ",
 } as const;
