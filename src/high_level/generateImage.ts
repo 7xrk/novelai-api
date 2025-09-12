@@ -1,4 +1,4 @@
-import { fit } from "object-fit-math";
+import { fit, fitAndPosition } from "object-fit-math";
 import {
   apiAiGenerateImage,
   apiAiGenerateImageStream,
@@ -31,6 +31,7 @@ import {
 } from "./consts.ts";
 import { binarizeImage } from "./utils.ts";
 import { loadImage } from "./utils.ts";
+import { Canvas } from "@napi-rs/canvas";
 
 export type GenerateImageResponse = {
   params: Record<string, string | object>;
@@ -103,6 +104,12 @@ type V4VibeTransferInput = {
   strength?: number;
 };
 
+type V4_5CharacterReferenceInput = {
+  image: Blob | Uint8Array;
+  /** @default false */
+  styleAware?: boolean;
+};
+
 export type GenerateImageArgs = {
   prompt: string;
   /** 0 to 1 */
@@ -134,6 +141,7 @@ export type GenerateImageArgs = {
     | boolean;
   img2img?: Img2ImgImage;
   viveTransfer?: (V3VibeTransferInput | V4VibeTransferInput)[];
+  characterReference?: V4_5CharacterReferenceInput[];
   inpainting?: {
     /** any image type blob, white is inpainting */
     mask: Blob | Uint8Array;
@@ -356,6 +364,7 @@ async function checkAndNormalizeParams({
   sampler = NovelAIImageSamplers.Euler,
   noiseSchedule = NovelAINoiseSchedulers.Native,
   characterPrompts,
+  characterReference,
   extraPreset,
   v4LegacyConditioning,
   scale = 5,
@@ -479,6 +488,49 @@ async function checkAndNormalizeParams({
       (finalUndesired ?? "");
   }
 
+  if (characterReference && characterReference.length > 0) {
+    for (const ref of characterReference) {
+      const png = await convertToPng(ref.image);
+
+      if (png.imageSize.width > 1536 || png.imageSize.height > 1536) {
+        const fitTarget = png.imageSize.width > png.imageSize.height
+          ? { width: 1536, height: 1024 }
+          : { width: 1024, height: 1536 };
+
+        const fitSize = fitAndPosition(
+          fitTarget,
+          png.imageSize,
+          "contain",
+          "50%",
+          "50%",
+        );
+
+        const canvas = new Canvas(fitTarget.width, fitTarget.height);
+        const ctx = canvas.getContext("2d");
+        const img = await loadImage(new Uint8Array(png.buffer));
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, fitSize.width, fitSize.height);
+        ctx.drawImage(img, fitSize.x, fitSize.y, fitSize.width, fitSize.height);
+        ref.image = new Uint8Array(await canvas.encode("png"));
+      } else if (
+        (png.imageSize.width % 64) !== 0 ||
+        (png.imageSize.height % 64) !== 0
+      ) {
+        // If the image is not a multiple of 64, we need to pad it
+        const canvas = new Canvas(
+          nearest64(png.imageSize.width),
+          nearest64(png.imageSize.height),
+        );
+        const ctx = canvas.getContext("2d");
+        const img = await loadImage(new Uint8Array(png.buffer));
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        ref.image = new Uint8Array(await canvas.encode("png"));
+      }
+    }
+  }
+
   seed ??= randomInt();
 
   const disableSmeaOverride = isV4XModel(model)
@@ -519,6 +571,7 @@ async function checkAndNormalizeParams({
     img2img,
     viveTransfer,
     inpainting,
+    characterReference,
     ...disableSmeaOverride,
   } satisfies GenerateImageArgs;
 }
@@ -616,6 +669,49 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     }
   }
 
+  if (params.characterReference && params.characterReference.length > 0) {
+    if (!isCharacterReferenceAvailable(params.model!)) {
+      console.info(
+        `Character Reference is not available for model ${params.model}. Skip to attach reference images.`,
+      );
+    } else {
+      if (
+        (params.viveTransfer && params.viveTransfer.length > 0) ||
+        !!params.inpainting
+      ) {
+        throw new Error(
+          "Character Reference cannot be used with Vive Transfer or Inpainting",
+        );
+      }
+
+      body.parameters.director_reference_descriptions = [];
+      body.parameters.director_reference_images = [];
+      body.parameters.director_reference_information_extracted = [];
+      body.parameters.director_reference_strength_values = [];
+
+      const images = await Promise.all(
+        params.characterReference.map(async (v) =>
+          new Uint8Array((await convertToPng(v.image)).buffer)
+        ),
+      );
+
+      Deno.writeFileSync("./charref.png", images[0]);
+
+      params.characterReference.forEach((v, i) => {
+        body.parameters.director_reference_descriptions.push({
+          caption: {
+            base_caption: v.styleAware ? "character&style" : "character",
+            char_captions: [],
+          },
+          legacy_uc: false,
+        });
+        body.parameters.director_reference_images.push(encodeBase64(images[i]));
+        body.parameters.director_reference_information_extracted.push(1);
+        body.parameters.director_reference_strength_values.push(1);
+      });
+    }
+  }
+
   if (params.viveTransfer) {
     if (
       !isViveTransferAvailable(params.model!) &&
@@ -708,6 +804,13 @@ function isV3Model(model: NovelAIDiffusionModels): boolean {
 
 function isSmeaAvailableModel(model: NovelAIDiffusionModels): boolean {
   return !isV4XModel(model);
+}
+
+function isCharacterReferenceAvailable(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5Full
+  );
 }
 
 function isViveTransferAvailable(model: NovelAIDiffusionModels): boolean {
