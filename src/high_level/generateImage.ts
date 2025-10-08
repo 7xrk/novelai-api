@@ -106,6 +106,11 @@ type V4VibeTransferInput = {
 
 type V4_5CharacterReferenceInput = {
   image: Blob | Uint8Array;
+  /**
+   * 0 to 1
+   * @default 1
+   */
+  fidelity?: number;
   /** @default false */
   styleAware?: boolean;
 };
@@ -688,6 +693,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
       body.parameters.director_reference_images = [];
       body.parameters.director_reference_information_extracted = [];
       body.parameters.director_reference_strength_values = [];
+      body.parameters.director_reference_secondary_strength_values = [];
 
       const images = await Promise.all(
         params.characterReference.map(async (v) =>
@@ -708,6 +714,9 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
         body.parameters.director_reference_images.push(encodeBase64(images[i]));
         body.parameters.director_reference_information_extracted.push(1);
         body.parameters.director_reference_strength_values.push(1);
+        body.parameters.director_reference_secondary_strength_values.push(
+          v.fidelity ?? 1,
+        );
       });
     }
   }
