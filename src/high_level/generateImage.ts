@@ -701,8 +701,6 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
         ),
       );
 
-      Deno.writeFileSync("./charref.png", images[0]);
-
       params.characterReference.forEach((v, i) => {
         body.parameters.director_reference_descriptions.push({
           caption: {
