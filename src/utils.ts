@@ -2,15 +2,15 @@ export { encodeBase64 } from "@std/encoding/base64";
 
 type Result<T, E = unknown> =
   | ({
-      ok: true;
-      result: T;
-      error: null;
-    } & readonly [result: T, error: null])
+    ok: true;
+    result: T;
+    error: null;
+  } & readonly [result: T, error: null])
   | ({
-      ok: false;
-      result: null;
-      error: E;
-    } & readonly [result: null, error: E]);
+    ok: false;
+    result: null;
+    error: E;
+  } & readonly [result: null, error: E]);
 
 export const rescue: {
   <T>(proc: () => Promise<T>): Promise<Result<T>>;

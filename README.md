@@ -53,7 +53,7 @@ result.files.forEach((file, i) => {
 ### Upscale Image Example
 
 ```typescript
-import { upscaleImage, NovelAISession } from "jsr:@7xrk/novelai-api";
+import { NovelAISession, upscaleImage } from "jsr:@7xrk/novelai-api";
 
 const session = await NovelAISession.login("email", "password");
 // or `new NovelAISession({ accessToken: 'token' })`

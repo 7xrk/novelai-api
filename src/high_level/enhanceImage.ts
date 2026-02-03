@@ -1,8 +1,8 @@
 import type { INovelAISession } from "../libs/session.ts";
 import {
   generateImage,
-  type GenerateImageResponse,
   type GenerateImageArgs,
+  type GenerateImageResponse,
 } from "./generateImage.ts";
 import { loadImage } from "./utils.ts";
 

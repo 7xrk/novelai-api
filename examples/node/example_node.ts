@@ -2,11 +2,11 @@ import { outdent } from "outdent";
 import { config } from "dotenv";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import {
-  NovelAIDiffusionModels,
-  NovelAISession,
   generateImage,
+  NovelAIDiffusionModels,
   NovelAIImageSizePreset,
   NovelAIImageUCPresetType,
+  NovelAISession,
 } from "@7xrk/novelai-api";
 
 const env = config({ path: "../.env" }).parsed!;

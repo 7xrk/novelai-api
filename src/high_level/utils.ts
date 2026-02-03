@@ -1,7 +1,7 @@
 import {
-  loadImage as _loadImage,
   createCanvas,
   ImageData,
+  loadImage as _loadImage,
 } from "@napi-rs/canvas";
 
 export type Size = Readonly<{
@@ -10,8 +10,9 @@ export type Size = Readonly<{
 }>;
 
 export async function resizeImage(image: Blob | Uint8Array, size: Size) {
-  const bin =
-    image instanceof Blob ? new Uint8Array(await image.arrayBuffer()) : image;
+  const bin = image instanceof Blob
+    ? new Uint8Array(await image.arrayBuffer())
+    : image;
   const img = await loadImage(bin);
 
   const c = createCanvas(size.width, size.height);
@@ -47,8 +48,9 @@ export async function convertToPng(image: Blob | Uint8Array | ImageData) {
 }
 
 export async function loadImage(image: Blob | Uint8Array) {
-  const bin =
-    image instanceof Blob ? new Uint8Array(await image.arrayBuffer()) : image;
+  const bin = image instanceof Blob
+    ? new Uint8Array(await image.arrayBuffer())
+    : image;
   return await _loadImage(bin);
 }
 

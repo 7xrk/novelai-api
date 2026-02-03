@@ -3,10 +3,10 @@ import { apiAiAugmentImage } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import { safeJsonParse } from "../utils.ts";
 import {
-  type Size,
   adjustResolution,
   convertToPng,
   nearest64,
+  type Size,
 } from "./utils.ts";
 import {
   NovelAIAugmentImageRequestTypes,
@@ -53,17 +53,19 @@ export async function augmentImage(
     image,
     limitToFreeInOpus,
     ...params
-  }: {
-    size: Size;
-    image: Blob | Uint8Array;
-    limitToFreeInOpus?: boolean;
-  } & (
-    | RemoveBGAugmentParam
-    | EmotionAugmentParam
-    | SketchAugmentParam
-    | LineArtAugmentParam
-    | ColorizeAugmentParam
-  ),
+  }:
+    & {
+      size: Size;
+      image: Blob | Uint8Array;
+      limitToFreeInOpus?: boolean;
+    }
+    & (
+      | RemoveBGAugmentParam
+      | EmotionAugmentParam
+      | SketchAugmentParam
+      | LineArtAugmentParam
+      | ColorizeAugmentParam
+    ),
 ): Promise<AugmentImageResponse> {
   if (
     params.reqType === NovelAIAugmentImageRequestTypes.removeBg &&
@@ -90,17 +92,15 @@ export async function augmentImage(
       ? `${params.emotion};;`
       : "";
 
-  const defry =
-    params.reqType === NovelAIAugmentImageRequestTypes.colorize ||
-    params.reqType === NovelAIAugmentImageRequestTypes.emotion
-      ? params.defry
-      : 0;
+  const defry = params.reqType === NovelAIAugmentImageRequestTypes.colorize ||
+      params.reqType === NovelAIAugmentImageRequestTypes.emotion
+    ? params.defry
+    : 0;
 
-  const prompt =
-    params.reqType === NovelAIAugmentImageRequestTypes.colorize ||
-    params.reqType === NovelAIAugmentImageRequestTypes.emotion
-      ? `${emotionPrefix}${params.prompt}`
-      : "";
+  const prompt = params.reqType === NovelAIAugmentImageRequestTypes.colorize ||
+      params.reqType === NovelAIAugmentImageRequestTypes.emotion
+    ? `${emotionPrefix}${params.prompt}`
+    : "";
 
   const reqParams = {
     defry,
