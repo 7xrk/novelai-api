@@ -104,15 +104,17 @@ type V4VibeTransferInput = {
   strength?: number;
 };
 
-type V4_5CharacterReferenceInput = {
+type V4_5PreciseReferenceInput = {
   image: Blob | Uint8Array;
-  /**
-   * 0 to 1
-   * @default 1
-   */
+  /** 0 to 1 @default 1 */
+  strength?: number;
+  /** 0 to 1 @default 1 */
   fidelity?: number;
-  /** @default false */
-  styleAware?: boolean;
+  /** @default { character: true, style: true } */
+  mode: {
+    character: boolean;
+    style: boolean;
+  };
 };
 
 export type GenerateImageArgs = {
@@ -146,7 +148,7 @@ export type GenerateImageArgs = {
     | boolean;
   img2img?: Img2ImgImage;
   viveTransfer?: (V3VibeTransferInput | V4VibeTransferInput)[];
-  characterReference?: V4_5CharacterReferenceInput[];
+  preciseReferences?: V4_5PreciseReferenceInput[];
   inpainting?: {
     /** any image type blob, white is inpainting */
     mask: Blob | Uint8Array;
@@ -369,7 +371,7 @@ async function checkAndNormalizeParams({
   sampler = NovelAIImageSamplers.Euler,
   noiseSchedule = NovelAINoiseSchedulers.Native,
   characterPrompts,
-  characterReference,
+  preciseReferences,
   extraPreset,
   v4LegacyConditioning,
   scale = 5,
@@ -493,8 +495,8 @@ async function checkAndNormalizeParams({
       (finalUndesired ?? "");
   }
 
-  if (characterReference && characterReference.length > 0) {
-    for (const ref of characterReference) {
+  if (preciseReferences?.length) {
+    for (const ref of preciseReferences) {
       const png = await convertToPng(ref.image);
 
       if (png.imageSize.width > 1536 || png.imageSize.height > 1536) {
@@ -518,8 +520,8 @@ async function checkAndNormalizeParams({
         ctx.drawImage(img, fitSize.x, fitSize.y, fitSize.width, fitSize.height);
         ref.image = new Uint8Array(await canvas.encode("png"));
       } else if (
-        (png.imageSize.width % 64) !== 0 ||
-        (png.imageSize.height % 64) !== 0
+        png.imageSize.width % 64 !== 0 ||
+        png.imageSize.height % 64 !== 0
       ) {
         // If the image is not a multiple of 64, we need to pad it
         const canvas = new Canvas(
@@ -576,7 +578,7 @@ async function checkAndNormalizeParams({
     img2img,
     viveTransfer,
     inpainting,
-    characterReference,
+    preciseReferences,
     ...disableSmeaOverride,
   } satisfies GenerateImageArgs;
 }
@@ -674,7 +676,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     }
   }
 
-  if (params.characterReference && params.characterReference.length > 0) {
+  if (params.preciseReferences && params.preciseReferences.length > 0) {
     if (!isCharacterReferenceAvailable(params.model!)) {
       console.info(
         `Character Reference is not available for model ${params.model}. Skip to attach reference images.`,
@@ -696,15 +698,15 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
       body.parameters.director_reference_secondary_strength_values = [];
 
       const images = await Promise.all(
-        params.characterReference.map(async (v) =>
-          new Uint8Array((await convertToPng(v.image)).buffer)
+        params.preciseReferences.map(
+          async (v) => new Uint8Array((await convertToPng(v.image)).buffer),
         ),
       );
 
-      params.characterReference.forEach((v, i) => {
+      params.preciseReferences.forEach((v, i) => {
         body.parameters.director_reference_descriptions.push({
           caption: {
-            base_caption: v.styleAware ? "character&style" : "character",
+            base_caption: getPreciseReferenceModeString(v.mode),
             char_captions: [],
           },
           legacy_uc: false,
@@ -857,6 +859,21 @@ function isEncodedVibeTransferRequired(model: NovelAIDiffusionModels): boolean {
 
 function isCharacterPromptsAvailable(model: NovelAIDiffusionModels): boolean {
   return isV4XModel(model);
+}
+
+function getPreciseReferenceModeString(mode: {
+  character: boolean;
+  style: boolean;
+}) {
+  if (mode.style && mode.character) {
+    return "character&style";
+  } else if (mode.style && !mode.character) {
+    return "style";
+  } else if (!mode.style && mode.character) {
+    return "character";
+  } else {
+    throw new Error("At least one of character or style must be true");
+  }
 }
 
 function getQualityTags(model: NovelAIDiffusionModels) {
