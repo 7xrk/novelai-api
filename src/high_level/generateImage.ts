@@ -713,7 +713,9 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
         });
         body.parameters.director_reference_images.push(encodeBase64(images[i]));
         body.parameters.director_reference_information_extracted.push(1);
-        body.parameters.director_reference_strength_values.push(1);
+        body.parameters.director_reference_strength_values.push(
+          v.strength ?? 1,
+        );
         body.parameters.director_reference_secondary_strength_values.push(
           v.fidelity ?? 1,
         );
