@@ -107,8 +107,6 @@ type V4VibeTransferInput = {
 type V4_5PreciseReferenceInput = {
   image: Blob | Uint8Array;
   /** 0 to 1 @default 1 */
-  informationExtracted?: number;
-  /** 0 to 1 @default 1 */
   strength?: number;
   /** 0 to 1 @default 1 */
   fidelity?: number;
@@ -714,9 +712,7 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
           legacy_uc: false,
         });
         body.parameters.director_reference_images.push(encodeBase64(images[i]));
-        body.parameters.director_reference_information_extracted.push(
-          v.informationExtracted ?? 1,
-        );
+        body.parameters.director_reference_information_extracted.push(1);
         body.parameters.director_reference_strength_values.push(
           v.strength ?? 1,
         );
