@@ -50,10 +50,11 @@ export async function encodeVibe(
   vibe: EncodedVibe;
 }> {
   const png = await convertToPng(image);
-  const pngBase64 = encodeBase64(png.buffer);
+  const pngBytes = new Uint8Array(png.buffer);
+  const pngBase64 = encodeBase64(pngBytes);
 
   const res = await apiAiEncodeVibe(session, {
-    image: png.buffer,
+    image: pngBytes,
     information_extracted: informationExtracted,
     model,
   });
@@ -127,6 +128,10 @@ function getEncodingKey(e: NovelAIDiffusionModels | string): string {
       return "v4curated";
     case NovelAIDiffusionModels.NAIDiffusionV4Full:
       return "v4full";
+    case NovelAIDiffusionModels.NAIDiffusionV4_5Curated:
+      return "v4-5curated";
+    case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
+      return "v4-5full";
     case "custom":
       return "custom";
   }

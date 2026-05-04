@@ -1,10 +1,9 @@
 {
   "name": "@7xrk/novelai-api",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "license": "Unlicense",
   "exports": {
-    ".": "./mod.ts",
-    "./client": "./client.ts"
+    ".": "./mod.ts"
   },
   "lint": {
     "exclude": ["node_modules", "node", ".pnp.*"],
