@@ -12,6 +12,7 @@ export {
   generateImageStream,
   type GenerateImageStreamResponse,
   getGenerateResolution,
+  getVibeEncodingKey,
   suggestTags,
   type SuggestTagsResponse,
   upscaleImage,

@@ -23,5 +23,6 @@ export {
   bundleVibes,
   type EncodedVibe,
   encodeVibe,
+  getVibeEncodingKey,
 } from "./high_level/encodeVibe.ts";
 export { calculateAnlasCost } from "./image_gen/anlasCalculator.ts";

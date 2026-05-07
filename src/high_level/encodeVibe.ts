@@ -90,7 +90,7 @@ export async function encodeVibe(
     }
   }
 
-  vibe.encodings[getEncodingKey(model)] = {
+  vibe.encodings[getVibeEncodingKey(model)] = {
     [
       await toVibeHash({
         information_extracted: 1,
@@ -122,7 +122,7 @@ export function bundleVibes(vibes: EncodedVibe[]): {
   };
 }
 
-function getEncodingKey(e: NovelAIDiffusionModels | string): string {
+export function getVibeEncodingKey(e: NovelAIDiffusionModels | string): string {
   switch (e) {
     case NovelAIDiffusionModels.NAIDiffusionV4CuratedPreview:
       return "v4curated";
