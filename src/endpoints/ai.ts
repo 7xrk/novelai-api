@@ -114,7 +114,7 @@ export async function apiAiUpscale(
     scale: number;
   },
 ): Promise<Response> {
-  return await session.req("/ai/upscale", {
+  return await session.req("https://image.novelai.net/ai/upscale", {
     method: "POST",
     body: JSON.stringify({
       image: encodeBase64(image),

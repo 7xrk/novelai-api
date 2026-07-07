@@ -38,7 +38,7 @@ export class NovelAISession implements INovelAISession {
   ): Promise<{ accessToken: string | null }> {
     const accessKey = await this.getAccessKey(email, password);
 
-    const res = await fetch(endpoint("/user/login"), {
+    const res = await fetch(endpoint("https://image.novelai.net/user/login"), {
       method: "POST",
       body: JSON.stringify({ key: accessKey }),
       headers: {
