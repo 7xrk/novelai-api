@@ -125,6 +125,8 @@ export type GenerateImageArgs = {
   ucPreset?: NovelAIImageUCPresetType;
   characterPrompts?: GenerateImageCharacterPrompts;
   qualityTags?: boolean;
+  /** V5 models only. "furry" prepends "fur dataset, " to the prompt */
+  v5Mode?: "anime" | "furry";
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
   v4LegacyConditioning?: boolean;
   model?: NovelAIDiffusionModels;
@@ -379,6 +381,7 @@ async function checkAndNormalizeParams({
   size = { width: 512, height: 512 },
   nSamples,
   qualityTags = true,
+  v5Mode,
   promptGuideRescale = 0,
   guidance,
   smea,
@@ -468,6 +471,13 @@ async function checkAndNormalizeParams({
       case NovelAIDiffusionModels.NAIDiffusionV4_5Full:
         model = NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting;
         break;
+      case NovelAIDiffusionModels.NAIDiffusionV5Full:
+        model = NovelAIDiffusionModels.NAIDiffusionV5FullInpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionV5Curated:
+        throw new Error(
+          "Inpainting is not supported with nai-diffusion-5-curated",
+        );
     }
 
     // NovelAI V4 requires 8px binary mask
@@ -480,6 +490,16 @@ async function checkAndNormalizeParams({
 
   let finalPrompt = prompt;
   let finalUndesired = undesiredContent ?? "";
+
+  if (v5Mode === "furry") {
+    if (isV5Model(model)) {
+      finalPrompt = "fur dataset, " + finalPrompt;
+    } else {
+      console.info(
+        `v5Mode is only available for V5 models. Ignored for model ${model}.`,
+      );
+    }
+  }
 
   if (extraPreset) {
     const presetPrompt = NovelAIAImageExtraPresets[extraPreset];
@@ -558,6 +578,7 @@ async function checkAndNormalizeParams({
   return {
     prompt: finalPrompt,
     undesiredContent: finalUndesired,
+    ucPreset,
     model,
     sampler,
     noiseSchedule,
@@ -789,6 +810,32 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     };
   }
 
+  if (isV5Model(body.model)) {
+    body.parameters.params_version = 4;
+    body.parameters.ucPresetId = params.ucPreset ?? "heavy";
+    // TODO: id for qualityTags: false is not captured yet
+    body.parameters.qualityPresetId = "standard";
+    body.parameters.tag_hint_qt = 1;
+    body.parameters.tag_hint_uc_preset = 2;
+    body.parameters.normalize_reference_strength_multiple = true;
+    body.parameters.straight_alpha = true;
+    body.parameters.image_format = "png";
+    body.parameters.inpaintImg2ImgStrength ??= 1;
+    body.parameters.add_original_image ??= true;
+
+    if (body.parameters.skip_cfg_above_sigma != null) {
+      console.info(
+        `guidance.variety is not available for model ${body.model}. Ignored.`,
+      );
+    }
+
+    // These fields do not exist in V5 payloads
+    delete body.parameters.sm;
+    delete body.parameters.sm_dyn;
+    delete body.parameters.qualityToggle;
+    delete body.parameters.skip_cfg_above_sigma;
+  }
+
   return body;
 }
 
@@ -800,7 +847,16 @@ function isV4XModel(model: NovelAIDiffusionModels) {
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Curated ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5CuratedInpainting ||
     model === NovelAIDiffusionModels.NAIDiffusionV4_5Full ||
-    model === NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting
+    model === NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting ||
+    isV5Model(model)
+  );
+}
+
+export function isV5Model(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionV5Curated ||
+    model === NovelAIDiffusionModels.NAIDiffusionV5Full ||
+    model === NovelAIDiffusionModels.NAIDiffusionV5FullInpainting
   );
 }
 

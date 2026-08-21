@@ -29,7 +29,11 @@ function isV4Model(model: NovelAIDiffusionModels): boolean {
     model === "nai-diffusion-4-5-curated" ||
     model === "nai-diffusion-4-5-curated-inpainting" ||
     model === "nai-diffusion-4-5-full" ||
-    model === "nai-diffusion-4-5-full-inpainting"
+    model === "nai-diffusion-4-5-full-inpainting" ||
+    // V5 cost formula is not confirmed, assumed same as V4
+    model === "nai-diffusion-5-curated" ||
+    model === "nai-diffusion-5-full" ||
+    model === "nai-diffusion-5-full-inpainting"
   );
 }
 

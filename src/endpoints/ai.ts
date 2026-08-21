@@ -11,12 +11,14 @@ export async function apiAiGenerateImageSuggestTags(
     model: NovelAIDiffusionModels;
     prompt: string;
     lang?: "jp" | undefined;
+    type?: "furryv5" | "animev5" | string;
   },
 ): Promise<Response> {
   const searchParams = new URLSearchParams();
   searchParams.set("model", params.model);
   searchParams.set("prompt", params.prompt);
   if (params.lang) searchParams.set("lang", params.lang);
+  if (params.type) searchParams.set("type", params.type);
 
   return await session.req(
     `https://image.novelai.net/ai/generate-image/suggest-tags?${searchParams}`,

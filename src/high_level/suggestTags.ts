@@ -2,6 +2,7 @@ import { apiAiGenerateImageSuggestTags } from "../endpoints/ai.ts";
 import type { INovelAISession } from "../libs/session.ts";
 import { safeJsonParse } from "../utils.ts";
 import type { NovelAIDiffusionModels } from "./consts.ts";
+import { isV5Model } from "./generateImage.ts";
 
 type JpResponse = Array<{ jp_tag: string; en_tag: string; power: number }>;
 type EnResponse = {
@@ -21,13 +22,19 @@ export async function suggestTags(
   params: {
     model: NovelAIDiffusionModels;
     prompt: string;
+    /** V5 models only. Selects the suggestion dataset */
+    v5Mode?: "anime" | "furry";
   },
 ): Promise<SuggestTagsResponse> {
   const hasJaString = UNICODE_REGEX.test(params.prompt);
 
   const res = await apiAiGenerateImageSuggestTags(session, {
-    ...params,
+    model: params.model,
+    prompt: params.prompt,
     lang: hasJaString ? "jp" : undefined,
+    type: isV5Model(params.model)
+      ? params.v5Mode === "furry" ? "furryv5" : "animev5"
+      : undefined,
   });
 
   if (!res.ok) {

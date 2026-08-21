@@ -45,6 +45,9 @@ export const NovelAIDiffusionModels = /* @__PURE__ */ {
   NAIDiffusionV4_5CuratedInpainting: "nai-diffusion-4-5-curated-inpainting",
   NAIDiffusionV4_5Full: "nai-diffusion-4-5-full",
   NAIDiffusionV4_5FullInpainting: "nai-diffusion-4-5-full-inpainting",
+  NAIDiffusionV5Curated: "nai-diffusion-5-curated",
+  NAIDiffusionV5Full: "nai-diffusion-5-full",
+  NAIDiffusionV5FullInpainting: "nai-diffusion-5-full-inpainting",
 } as const;
 Object.freeze(NovelAIDiffusionModels);
 
@@ -174,6 +177,14 @@ export const NovelAIImageQualityPresets = {
   [NovelAIDiffusionModels.NAIDiffusionV4_5FullInpainting]:
     ", very aesthetic, masterpiece, no text",
 
+  // V5 curated tags are not captured yet, assumed same as V5 full
+  [NovelAIDiffusionModels.NAIDiffusionV5Curated]:
+    ", very aesthetic, masterpiece, no text",
+  [NovelAIDiffusionModels.NAIDiffusionV5Full]:
+    ", very aesthetic, masterpiece, no text",
+  [NovelAIDiffusionModels.NAIDiffusionV5FullInpainting]:
+    ", very aesthetic, masterpiece, no text",
+
   default: "masterpiece, best quality, ",
 } as const;
 Object.freeze(NovelAIImageQualityPresets);
@@ -287,6 +298,24 @@ export const NovelAIImageUCPresets = {
       "{worst quality}, distracting watermark, unfinished, bad quality, {widescreen}, upscale, {sequence}, {{grandfathered content}}, blurred foreground, chromatic aberration, sketch, everyone, [sketch background], simple, [flat colors], ych (character), outline, multiple scenes, [[horror (theme)]], comic",
     humanFocus:
       "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, @_@, mismatched pupils, glowing eyes, bad anatomy",
+  },
+
+  // V5 presets other than "heavy" are not captured yet.
+  // Curated is assumed same as V5 full.
+  [NovelAIDiffusionModels.NAIDiffusionV5Curated]: {
+    heavy:
+      "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
+    none: "",
+  },
+  [NovelAIDiffusionModels.NAIDiffusionV5Full]: {
+    heavy:
+      "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
+    none: "",
+  },
+  [NovelAIDiffusionModels.NAIDiffusionV5FullInpainting]: {
+    heavy:
+      "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
+    none: "",
   },
 } as const;
 Object.freeze(NovelAIImageUCPresets);
