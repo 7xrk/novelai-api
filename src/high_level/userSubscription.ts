@@ -37,6 +37,13 @@ export type UserSubscriptionResponse = {
   };
   accountType: number;
   isGracePeriod: boolean;
+  usage?: {
+    /** Remaining Opus generation allowance in percent, can exceed 100 */
+    percent: number;
+    isNegative: boolean;
+    /** Seconds until the next 1% recharges */
+    timeUntilNextPercent: number;
+  };
 };
 
 export async function userSubscription(
