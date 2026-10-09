@@ -33,7 +33,9 @@ function isV4Model(model: NovelAIDiffusionModels): boolean {
     // V5 cost formula is not confirmed, assumed same as V4
     model === "nai-diffusion-5-curated" ||
     model === "nai-diffusion-5-full" ||
-    model === "nai-diffusion-5-full-inpainting"
+    model === "nai-diffusion-5-full-inpainting" ||
+    model === "nai-diffusion-5-full-medium" ||
+    model === "nai-diffusion-5-full-medium-inpainting"
   );
 }
 

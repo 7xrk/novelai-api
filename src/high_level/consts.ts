@@ -48,6 +48,9 @@ export const NovelAIDiffusionModels = /* @__PURE__ */ {
   NAIDiffusionV5Curated: "nai-diffusion-5-curated",
   NAIDiffusionV5Full: "nai-diffusion-5-full",
   NAIDiffusionV5FullInpainting: "nai-diffusion-5-full-inpainting",
+  /** V5 Full at Medium effort, a distilled model with fixed sampling settings */
+  NAIDiffusionV5FullMedium: "nai-diffusion-5-full-medium",
+  NAIDiffusionV5FullMediumInpainting: "nai-diffusion-5-full-medium-inpainting",
 } as const;
 Object.freeze(NovelAIDiffusionModels);
 
@@ -184,6 +187,10 @@ export const NovelAIImageQualityPresets = {
     ", very aesthetic, masterpiece, no text",
   [NovelAIDiffusionModels.NAIDiffusionV5FullInpainting]:
     ", very aesthetic, masterpiece, no text",
+  [NovelAIDiffusionModels.NAIDiffusionV5FullMedium]:
+    ", very aesthetic, masterpiece, no text",
+  [NovelAIDiffusionModels.NAIDiffusionV5FullMediumInpainting]:
+    ", very aesthetic, masterpiece, no text",
 
   default: "masterpiece, best quality, ",
 } as const;
@@ -313,6 +320,16 @@ export const NovelAIImageUCPresets = {
     none: "",
   },
   [NovelAIDiffusionModels.NAIDiffusionV5FullInpainting]: {
+    heavy:
+      "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
+    none: "",
+  },
+  [NovelAIDiffusionModels.NAIDiffusionV5FullMedium]: {
+    heavy:
+      "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
+    none: "",
+  },
+  [NovelAIDiffusionModels.NAIDiffusionV5FullMediumInpainting]: {
     heavy:
       "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page",
     none: "",

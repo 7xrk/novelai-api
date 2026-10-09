@@ -67,6 +67,13 @@ export type GenerateImageStreamResponse = ReadableStream<
 
 const SKIP_CFG_ABOVE_SIGMA_VALUE = 19;
 
+/** Settings NovelAI fixes for Medium effort models, whatever the user sets */
+const MEDIUM_EFFORT_FIXED_SETTINGS = {
+  steps: 14,
+  sampler: NovelAIImageSamplers.EulerAncestral,
+  ucPreset: NovelAIImageUCPresetType.Heavy,
+} as const;
+
 type Img2ImgImage = {
   /** any image type blob */
   image: Blob | Uint8Array;
@@ -127,6 +134,12 @@ export type GenerateImageArgs = {
   qualityTags?: boolean;
   /** V5 models only. "furry" prepends "fur dataset, " to the prompt */
   v5Mode?: "anime" | "furry";
+  /**
+   * V5 Full only. "medium" switches to a cheaper distilled model.
+   * Medium fixes steps, sampler and UC preset, and ignores undesiredContent and promptGuideRescale.
+   * @default "high"
+   */
+  effort?: "medium" | "high";
   extraPreset?: keyof typeof NovelAIImageExtraPresetType;
   v4LegacyConditioning?: boolean;
   model?: NovelAIDiffusionModels;
@@ -382,6 +395,7 @@ async function checkAndNormalizeParams({
   nSamples,
   qualityTags = true,
   v5Mode,
+  effort,
   promptGuideRescale = 0,
   guidance,
   smea,
@@ -392,6 +406,28 @@ async function checkAndNormalizeParams({
   inpainting,
 }: GenerateImageArgs) {
   let { width, height } = size;
+
+  if (effort === "medium") {
+    if (model === NovelAIDiffusionModels.NAIDiffusionV5Full) {
+      model = NovelAIDiffusionModels.NAIDiffusionV5FullMedium;
+    } else {
+      console.info(
+        `effort is only available for ${NovelAIDiffusionModels.NAIDiffusionV5Full}. Ignored for model ${model}.`,
+      );
+    }
+  }
+
+  // Medium effort models only accept fixed settings, as novelai.net sends
+  if (isMediumEffortModel(model)) {
+    ({ steps, sampler, ucPreset } = MEDIUM_EFFORT_FIXED_SETTINGS);
+    undesiredContent = "";
+    if (characterPrompts) {
+      characterPrompts = {
+        ...characterPrompts,
+        captions: characterPrompts.captions.map((v) => ({ ...v, uc: "" })),
+      };
+    }
+  }
 
   if (!isCharacterPromptsAvailable(model) && characterPrompts) {
     throw new Error("characterPrompts is only supported with NovelAI V4 model");
@@ -473,6 +509,9 @@ async function checkAndNormalizeParams({
         break;
       case NovelAIDiffusionModels.NAIDiffusionV5Full:
         model = NovelAIDiffusionModels.NAIDiffusionV5FullInpainting;
+        break;
+      case NovelAIDiffusionModels.NAIDiffusionV5FullMedium:
+        model = NovelAIDiffusionModels.NAIDiffusionV5FullMediumInpainting;
         break;
       case NovelAIDiffusionModels.NAIDiffusionV5Curated:
         throw new Error(
@@ -834,6 +873,11 @@ async function getGenerateImageParams(params: GenerateImageArgs) {
     delete body.parameters.sm_dyn;
     delete body.parameters.qualityToggle;
     delete body.parameters.skip_cfg_above_sigma;
+
+    // Medium effort models have no CFG Rescale, so novelai.net does not send it
+    if (isMediumEffortModel(body.model)) {
+      delete body.parameters.cfg_rescale;
+    }
   }
 
   return body;
@@ -856,7 +900,15 @@ export function isV5Model(model: NovelAIDiffusionModels): boolean {
   return (
     model === NovelAIDiffusionModels.NAIDiffusionV5Curated ||
     model === NovelAIDiffusionModels.NAIDiffusionV5Full ||
-    model === NovelAIDiffusionModels.NAIDiffusionV5FullInpainting
+    model === NovelAIDiffusionModels.NAIDiffusionV5FullInpainting ||
+    isMediumEffortModel(model)
+  );
+}
+
+function isMediumEffortModel(model: NovelAIDiffusionModels): boolean {
+  return (
+    model === NovelAIDiffusionModels.NAIDiffusionV5FullMedium ||
+    model === NovelAIDiffusionModels.NAIDiffusionV5FullMediumInpainting
   );
 }
 
